@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h1 class="text-xl font-bold mb-6">Productos en Inventario</h1>
+<input type="text" id="buscador" placeholder="Buscar producto..."
+      class="w-full mb-4 p-2 border border bg-gray-300 rounded">
+
+<button onclick="abrirModalCrear()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+    Agregar Producto
+</button>
+
+<button href="{% url 'importar_productos' %}" class="bg-blue-500 text-white px-4 py-2 rounded mb-4" onclick="abrirModalImportar()"> 
+  Importar productos desde Excel
+
+</button>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+  {% for producto in productos %}
+  <div class="col-md-4 mb-4">
+    <div class="card h-100 shadow cursor-pointer" style="position: relative;" onclick="abrirModal({{ producto.id }})" style="cursor: pointer;">
+      {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" class="card-img-top" alt="Imagen del producto">
+      {% else %}
+        <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: #f5f5f5;">
+          <span>Sin imagen</span>
+        </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ producto.nombre }}</h5>
+        <p class="card-text"><strong>Código:</strong> {{ producto.codigo }}</p>
+        <p class="card-text"><strong>Proveedor:</strong> {{ producto.proveedor }}</p>
+        <p class="card-text"><strong>Adquisición:</strong> {{ producto.get_tipo_adquisicion_display }}</p>
+        <p class="card-text"><strong>Precio:</strong> S/ {{ producto.precio_unitario }}</p>
+        <p class="card-text"><strong>Stock:</strong> <span class="badge bg-success">{{ producto.stock_actual }}</span></p>
+        
+        <form action="{% url 'eliminar_producto' producto.id %}" method="post" 
+              onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');"
+              style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+          {% csrf_token %}
+          <button type="submit" onclick="event.stopPropagation()" style="background: none; border: none; color: #999; font-size: 16px; cursor: pointer;" title="Eliminar">
+            &times;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal para Editar Producto -->
+ <div id="modal-producto" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal()">&times;</span>
+        <form id="formProducto" method="post" action="{%  url 'editar_producto' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" id="producto_id" name="producto_id">
+
+            <label>Nombre:</label>
+            <input type="text" id="nombre" name="nombre" class="form-control"><br>
+
+            <label>Código:</label>
+            <input type="text" id="codigo" name="codigo" class="form-control"><br>
+
+            <label>Proveedor:</label>
+            <input type="text" id="proveedor" name="proveedor" class="form-control"><br>
+
+            <label>Precio Unitario:</label>
+            <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
+
+            <label>Imagen:</label>
+            <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
+
+            <button type="submit" class="btn  btn-success">Guardar cambio</button>
+        </form>
+    </div>
+ </div>
+
+
+
+ <!-- Modal para crear producto -->
+<div id="modal-crear" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalCrear()">&times;</span>
+    <form id="formCrearProducto" method="post" enctype="multipart/form-data" action="{% url 'crear_producto' %}">
+      {% csrf_token %}
+      
+      <label>Nombre:</label>
+      <input type="text" name="nombre" class="form-control"><br>
+
+      <label>Proveedor:</label>
+      <input type="text" name="proveedor" class="form-control"><br>
+      
+      <label>Tipo de Adquisición:</label>
+      <select id="tipo_adquisicion" name="tipo_adquisicion" class="form-control" required>
+        <option value="F1">Fabricación</option>
+        <option value="M1">Compra/Venta</option>
+      </select><br>
+
+      <label>Precio Unitario:</label>
+      <input type="number" step="0.01" name="precio_unitario" class="form-control"><br>
+
+      <label>Imagen:</label>
+      <input type="file" name="imagen" class="form-control"><br><br>
+
+      <button type="submit" class="btn btn-success">Crear Producto</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal para Importar -->
+ <div id="modal-importar" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalImportar()">&times;</span>
+    <h5 class="text.lg font-semibold mb-4"> Importar Productos desde Excel</h5>
+    <form method="post" action="{% url 'importar_productos' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="archivo_excel"> Selecciona el archivo Excel ( .xlsx o .xls):</label>
+      <input type="file" name="archivo_excel" id="archivo_excel" class="form-control my-2" required>
+      <button type="submit" class="btn btn-success"> Importar</button>
+    </form>
+  </div>
+ </div>
+
+
+<!-- Script de Modal para configurar tarjetas -->
+<script>
+function abrirModal(id) {
+  id = parseInt(id);
+  fetch(`/productos/${id}/json/`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("producto_id").value = data.id;
+      document.getElementById("nombre").value = data.nombre;
+      document.getElementById("codigo").value = data.codigo;
+      document.getElementById("proveedor").value = data.proveedor;
+      document.getElementById("precio").value = data.precio_unitario;
+      document.getElementById("modal-producto").style.display = "flex";
+    })
+    .catch(err => console.error("Error al cargar el producto:", err));
+}
+function cerrarModal() {
+  document.getElementById("modal-producto").style.display = "none";
+}
+</script>
+
+<script>
+function abrirModalCrear() {
+  document.getElementById("modal-crear").style.display = "flex";
+}
+function cerrarModalCrear() {
+  document.getElementById("modal-crear").style.display = "none";
+}
+</script>
+
+<!-- Script De modal para importar archivos -->
+<script>
+function abrirModalImportar() {
+  document.getElementById("modal-importar").style.display = "flex";
+}
+function cerrarModalImportar() {
+  document.getElementById("modal-importar").style.display = "none";
+}
+</script>
+
+<!-- Script para el buscador -->
+ <script>
+  document.getElementById('buscador').addEventListener('keyup', function () {
+    const filtro = this.value.toLowerCase();
+    const tarjetas = document.querySelectorAll('.card');
+
+    tarjetas.forEach(card => {
+      const texto = card.innerText.toLowerCase();
+      card.parentElement.style.display = texto.includes(filtro) ? '' : 'none';
+    });
+  });
+ </script>
+
+
+<!-- Estilos -->
+<style>
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 95%;
+    position: relative;
+}
+.close {
+    position: absolute;
+    right: 10px; top: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+</style>
+
+{% endblock %}
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Inventario{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script defer>
+      function abrirModal(productoId) {
+        fetch(`/productos/${productoId}/editar/`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("modal-body").innerHTML = html;
+          document.getElementById("modal-overlay").classList.remove("hidden");
+        });
+      }
+
+      function cerrarModal() {
+        document.getElementById("modal-overlay").classList.add("hidden");
+        document.getElementById("modal-body").innerHTML = "";
+      }
+    </script>
+  </head>
+
+  <body class="h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white p-4">
+      <h2 class="text-xl font-bold mb-6">C&R Inventario</h2>
+      <nav class="flex flex-col space-y-2">
+        <a href="{% url 'inicio' %}" class="hover:bg-gray-700 p-2 rounded"> Productos</a>
+        <a href="{% url 'registrar_entrada' %}" class="hover:bg-gray-700 p-2 rounded"> Entradas</a>
+        <a href="{% url 'registrar_salida' %}" class="hover:bg-gray-700 p-2 rounded"> Salidas</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 bg-gray-100 overflow-y-auto">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+        <div class="flex justify-between items-center border-b pb-2 mb-4">
+          <h2 class="text-xl font-semibold">Editar Producto</h2>
+          <button onclick="cerrarModal()" class="text-gray-600 hover:text-gray-800">&times;</button>
+        </div>
+        <div id="modal-body">
+          <!-- Formulario cargado por AJAX -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Salidas de Productos del Almacén</h1>
+
+<div class="flex space-x-4 mb-6">
+    <button onclick="abrirModalSalida()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Agregar Salida</button>
+    <button onclick="abrirModalImportarSalida()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar salidas desde Excel</button>
+</div>
+
+<table class="min-w-full bg-white shadow rounded-lg">
+    <thead>
+        <tr class="bg-gray-200 text-gray-700">
+            <th class="py-2 px-4 text-left">Producto</th>
+            <th class="py-2 px-4 text-left">Código</th>
+            <th class="py-2 px-4 text-left">Cantidad</th>
+            <th class="py-2 px-4 text-left">Proveedor</th>
+            <th class="py-2 px-4 text-left">Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for salida in salidas %}
+        <tr class="border-b hover:bg-gray-100">
+            <td class="py-2 px-4">{{ salida.producto.nombre }}</td>
+            <td class="py-2 px-4">{{ salida.producto.codigo }}</td>
+            <td class="py-2 px-4">{{ salida.cantidad }}</td>
+            <td class="py-2 px-4">{{ salida.producto.proveedor }}</td>
+            <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center py-4">No hay salidas registradas.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal Salida -->
+<div id="modalSalida" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalSalida()">&times;</span>
+    <h5>Registrar Salida</h5>
+    <form method="post" action="{% url 'registrar_salida' %}">
+      {% csrf_token %}
+      
+      <label for="producto_nombre">Producto:</label>
+      <input type="text" id="producto_nombre" name="producto_nombre" class="form-control" list="lista_productos" required>
+      <datalist id="lista_productos">
+        {% for producto in productos %}
+          <option value="{{ producto.nombre }}">
+        {% endfor %}
+      </datalist>
+
+      <p><strong>Código:</strong> <span id="producto_codigo">---</span></p>
+      <p><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+
+      <label for="cantidad">Cantidad:</label>
+      <input type="number" name="cantidad" class="form-control" required><br>
+
+      <button type="submit" class="btn btn-danger">Registrar Salida</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Importar Salida -->
+<div id="modalImportarSalida" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalImportarSalida()">&times;</span>
+    <form method="POST" action="{% url 'importar_salidas' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="archivo_excel">Subir archivo Excel:</label>
+      <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required><br>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar</button>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function abrirModalSalida() {
+  document.getElementById("modalSalida").style.display = "flex";
+}
+function cerrarModalSalida() {
+  document.getElementById("modalSalida").style.display = "none";
+}
+function abrirModalImportarSalida() {
+  document.getElementById("modalImportarSalida").style.display = "flex";
+}
+function cerrarModalImportarSalida() {
+  document.getElementById("modalImportarSalida").style.display = "none";
+}
+
+const productosData = {{ productos|safe }};
+document.getElementById('producto_nombre').addEventListener('input', function () {
+  const nombre = this.value;
+  const producto = productosData.find(p => p.nombre === nombre);
+  if (producto) {
+    document.getElementById('producto_codigo').textContent = producto.codigo;
+    document.getElementById('producto_proveedor').textContent = producto.proveedor;
+  } else {
+    document.getElementById('producto_codigo').textContent = '---';
+    document.getElementById('producto_proveedor').textContent = '---';
+  }
+});
+</script>
+
+{% endblock %}

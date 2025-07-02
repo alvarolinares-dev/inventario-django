@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4"> Entradas de Productos al Almacén</h1>
+
+
+<div class="flex space-x-4 mb-6">
+    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover: bg-green-700"> Agregar Entrada</button>
+    <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover: bg-blue-700"> Importar entradas desde excel</button>
+</div>
+
+<table class="min-w-full bg-white shadow rounded-lg">
+    <thead>
+        <tr class="bg-gray-200 text-gray-700">
+            <th class="py-2 px-4 text-left">Producto</th>
+            <th class="py-2 px-4 text-left">Código</th>
+            <th class="py-2 px-4 text-left">Cantidad</th>
+            <th class="py-2 px-4 text-left">Proveedor</th>
+            <th class="py-2 px-4 text-left">Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entrada in entradas %}
+        <tr class="border-b hover: bg-gray-100">
+            <td class="py-2 px-4">{{ entrada.producto.nombre }}</td>
+            <td class="py-2 px-4">{{ entrada.producto.codigo }}</td>
+            <td class="py-2 px-4">{{ entrada.cantidad }}</td>
+            <td class="py-2 px-4">{{ entrada.producto.proveedor }}</td>
+            <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center py-4">No hay entradas registradas.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<!--Modal AbrirModalEntrada()-->
+<div id="modalEntrada" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalEntrada()">&times;</span>
+    <h5>Registrar Entrada</h5>
+    <form method="post" action="{% url 'registrar_entrada' %}">
+      {% csrf_token %}
+      
+      <!-- Búsqueda del producto -->
+      <label for="producto_nombre">Producto:</label>
+      <input type="text" id="producto_nombre" name="producto_nombre" class="form-control" list="lista_productos" required>
+      <datalist id="lista_productos">
+        {% for producto in productos %}
+          <option value="{{ producto.nombre }}">
+        {% endfor %}
+      </datalist>
+      
+      <!-- Campos automáticos que se rellenarán vía JavaScript -->
+      <p><strong>Código:</strong> <span id="producto_codigo">---</span></p>
+      <p><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+
+      <!-- Cantidad -->
+      <label for="cantidad">Cantidad:</label>
+      <input type="number" name="cantidad" class="form-control" required>
+
+      <br>
+      <button type="submit" class="btn btn-success">Registrar Entrada</button>
+    </form>
+  </div>
+</div>
+
+
+<!--Modal AbrirImportarModal()-->
+<div id="modalImportarEntrada" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalImportarEntrada()">&times;</span>
+    <form method="POST" action="{% url 'importar_entradas' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="archivo_excel">Subir archivo Excel:</label>
+      <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required><br>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar</button>
+    </form>
+  </div>
+</div>
+
+
+<!--JS Modal Entrada-->
+<script>
+function abrirModalEntrada() {
+    document.getElementById("modalEntrada").style.display = "flex";
+}
+function cerrarModalEntrada() {
+    document.getElementById("modalEntrada").style.display = "none";
+}
+function abrirModalImportarEntrada() {
+    document.getElementById("modalImportarEntrada").style.display = "flex";
+}
+function cerrarModalImportarEntrada() {
+    document.getElementById("modalImportarEntrada").style.display = "none";
+}
+</script>
+
+<script>
+  const productosData = {{ productos|safe }};
+
+  document.getElementById('producto_nombre').addEventListener('input', function () {
+    const nombre = this.value;
+    const producto = productosData.find(p => p.nombre === nombre);
+    if (producto) {
+      document.getElementById('producto_codigo').textContent = producto.codigo;
+      document.getElementById('producto_proveedor').textContent = producto.proveedor;
+    } else {
+      document.getElementById('producto_codigo').textContent = '---';
+      document.getElementById('producto_proveedor').textContent = '---';
+    }
+  });
+</script>
+
+{% endblock %}
