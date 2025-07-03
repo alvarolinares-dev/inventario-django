@@ -24,7 +24,7 @@
     </thead>
     <tbody>
         {% for entrada in entradas %}
-        <tr class="border-b hover: bg-gray-100">
+        <tr class="border-b hover:bg-gray-100">
             <td class="py-2 px-4">
               <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
                 {% for producto in productos %}
@@ -42,10 +42,10 @@
             </td>
             <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
+          <td class="py-2 px-4">
+            <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
+          </td>
         </tr>
-        <td class="py-2 px-4">
-          <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
-        </td>
         {% empty %}
         <tr><td colspan="3" class="text-center py-4">No hay entradas registradas.</td></tr>
         {% endfor %}
@@ -58,7 +58,7 @@
   <div class="modal-content">
     <span class="close" onclick="cerrarModalEntrada()">&times;</span>
     <h5>Registrar Entrada</h5>
-    <form method="post" action="{% url 'registrar_entrada' %}">
+    <form method="post" action="{% url 'registrar_entrada_post' %}">
       {% csrf_token %}
       
       <!-- Búsqueda del producto -->
