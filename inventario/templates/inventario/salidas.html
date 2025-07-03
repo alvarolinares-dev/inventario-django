@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load l10n %}
 
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">Salidas de Productos del Almacén</h1>
 
 <div class="flex space-x-4 mb-6">
-    <button onclick="abrirModalSalida()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Agregar Salida</button>
-    <button onclick="abrirModalImportarSalida()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar salidas desde Excel</button>
+    <button onclick="abrirModalSalida()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar Salida</button>
 </div>
 
 <table class="min-w-full bg-white shadow rounded-lg">
@@ -18,90 +16,185 @@
             <th class="py-2 px-4 text-left">Cantidad</th>
             <th class="py-2 px-4 text-left">Proveedor</th>
             <th class="py-2 px-4 text-left">Fecha</th>
+            <th class="py-2 px-4 text-left">Acciones</th>
         </tr>
     </thead>
     <tbody>
         {% for salida in salidas %}
         <tr class="border-b hover:bg-gray-100">
-            <td class="py-2 px-4">{{ salida.producto.nombre }}</td>
-            <td class="py-2 px-4">{{ salida.producto.codigo }}</td>
-            <td class="py-2 px-4">{{ salida.cantidad }}</td>
-            <td class="py-2 px-4">{{ salida.producto.proveedor }}</td>
-            <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - H:i" }}</td>
+            <td class="py-2 px-4">
+                <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm">
+                    {% for producto in productos %}
+                        <option value="{{ producto.nombre }}" {% if salida.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td class="py-2 px-4" id="codigo_{{ salida.id }}">{{ salida.producto.codigo }}</td>
+            <td class="py-2 px-4">
+                <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)">
+            </td>
+            <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
+            <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
+            <td class="py-2 px-4">
+                <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
+            </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-center py-4">No hay salidas registradas.</td></tr>
+        <tr><td colspan="6" class="text-center py-4">No hay salidas registradas.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!-- Modal Salida -->
-<div id="modalSalida" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close" onclick="cerrarModalSalida()">&times;</span>
-    <h5>Registrar Salida</h5>
-    <form method="post" action="{% url 'registrar_salida' %}">
-      {% csrf_token %}
-      
-      <label for="producto_nombre">Producto:</label>
-      <input type="text" id="producto_nombre" name="producto_nombre" class="form-control" list="lista_productos" required>
-      <datalist id="lista_productos">
-        {% for producto in productos %}
-          <option value="{{ producto.nombre }}">
-        {% endfor %}
-      </datalist>
+<!-- Modal de Registrar Salida -->
+<div id="modalSalida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <button onclick="cerrarModalSalida()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
+        <h2 class="text-xl font-bold mb-4">Registrar Salida</h2>
 
-      <p><strong>Código:</strong> <span id="producto_codigo">---</span></p>
-      <p><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+        <form method="POST" action="{% url 'registrar_salida' %}">
+            {% csrf_token %}
 
-      <label for="cantidad">Cantidad:</label>
-      <input type="number" name="cantidad" class="form-control" required><br>
+            <label for="producto_nombre" class="block mb-1">Producto:</label>
+            <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos"
+                   class="w-full border border-gray-300 rounded px-3 py-2 mb-3" required>
+            <datalist id="lista_productos">
+                {% for producto in productos %}
+                    <option value="{{ producto.nombre }}">
+                {% endfor %}
+            </datalist>
 
-      <button type="submit" class="btn btn-danger">Registrar Salida</button>
-    </form>
-  </div>
+            <p class="text-sm text-gray-600 mb-2"><strong>Código:</strong> <span id="producto_codigo">---</span></p>
+            <p class="text-sm text-gray-600 mb-4"><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+
+            <label for="cantidad" class="block mb-1">Cantidad:</label>
+            <input type="number" name="cantidad" class="w-full border border-gray-300 rounded px-3 py-2 mb-4" required>
+
+            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Registrar Salida</button>
+        </form>
+    </div>
 </div>
 
-<!-- Modal Importar Salida -->
-<div id="modalImportarSalida" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close" onclick="cerrarModalImportarSalida()">&times;</span>
-    <form method="POST" action="{% url 'importar_salidas' %}" enctype="multipart/form-data">
-      {% csrf_token %}
-      <label for="archivo_excel">Subir archivo Excel:</label>
-      <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required><br>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar</button>
-    </form>
-  </div>
-</div>
+<!-- JS para mostrar info producto -->
+<script>
+const productosData = {{ productos_json|safe }};
 
-<!-- JavaScript -->
+document.getElementById('producto_nombre').addEventListener('input', function () {
+    const nombre = this.value;
+    const producto = productosData.find(p => p.nombre === nombre);
+    if (producto) {
+        document.getElementById('producto_codigo').textContent = producto.codigo;
+        document.getElementById('producto_proveedor').textContent = producto.proveedor;
+    } else {
+        document.getElementById('producto_codigo').textContent = '---';
+        document.getElementById('producto_proveedor').textContent = '---';
+    }
+});
+</script>
+
+<!-- Modal Control -->
 <script>
 function abrirModalSalida() {
-  document.getElementById("modalSalida").style.display = "flex";
+    document.getElementById("modalSalida").style.display = "flex";
 }
 function cerrarModalSalida() {
-  document.getElementById("modalSalida").style.display = "none";
+    document.getElementById("modalSalida").style.display = "none";
 }
-function abrirModalImportarSalida() {
-  document.getElementById("modalImportarSalida").style.display = "flex";
-}
-function cerrarModalImportarSalida() {
-  document.getElementById("modalImportarSalida").style.display = "none";
-}
+</script>
 
-const productosData = {{ productos|safe }};
-document.getElementById('producto_nombre').addEventListener('input', function () {
-  const nombre = this.value;
-  const producto = productosData.find(p => p.nombre === nombre);
-  if (producto) {
-    document.getElementById('producto_codigo').textContent = producto.codigo;
-    document.getElementById('producto_proveedor').textContent = producto.proveedor;
-  } else {
-    document.getElementById('producto_codigo').textContent = '---';
-    document.getElementById('producto_proveedor').textContent = '---';
-  }
-});
+<!-- Guardar cantidad -->
+<script>
+function guardarCantidadSalida(salidaId, cantidad) {
+    fetch("{% url 'actualizar_cantidad_salida' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `salida_id=${salidaId}&cantidad=${cantidad}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            alert("Error al actualizar la cantidad");
+        }
+    });
+}
+</script>
+
+<!-- Actualizar producto -->
+<script>
+function actualizarProductoSalida(selectElement, salidaId) {
+    const nombreSeleccionado = selectElement.value;
+    const producto = productosData.find(p => p.nombre === nombreSeleccionado);
+
+    if (producto) {
+        document.getElementById(`codigo_${salidaId}`).textContent = producto.codigo;
+        document.getElementById(`proveedor_${salidaId}`).textContent = producto.proveedor;
+
+        fetch("{% url 'actualizar_producto_salida' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({
+                salida_id: salidaId,
+                nuevo_producto: nombreSeleccionado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== "ok") {
+                alert("No se pudo actualizar: " + data.message);
+            }
+        })
+        .catch(error => {
+            alert("Error al guardar");
+        });
+    }
+}
+</script>
+
+<!-- Eliminar salida -->
+<script>
+function eliminarSalida(salidaId) {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta salida?")) return;
+
+    fetch("{% url 'eliminar_salida' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ salida_id: salidaId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert("Error al eliminar");
+        }
+    });
+}
+</script>
+
+<!-- Get CSRF token -->
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 
 {% endblock %}

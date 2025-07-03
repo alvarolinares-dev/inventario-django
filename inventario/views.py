@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from django.utils import timezone
 
 # Create your views here.
 def inicio(request):
@@ -67,18 +68,20 @@ def registrar_salida(request):
 
         try:
             producto = Producto.objects.get(nombre=nombre_producto)
+            Salida.objects.create(producto=producto, cantidad=cantidad)
         except Producto.DoesNotExist:
-            return redirect('registrar_salida')
-        
-        Salida.objects.create(producto=producto, cantidad=cantidad)
+            messages.error(request, 'Producto no encontrado')
+
         return redirect('registrar_salida')
     
-    productos = list(Producto.objects.values('nombre','codigo','proveedor'))
+    productos = list(Producto.objects.values('nombre', 'codigo', 'proveedor'))
     salidas = Salida.objects.all().order_by('-fecha')
     return render(request, 'inventario/salidas.html', {
         'productos': productos,
-        'salidas': salidas
+        'salidas': salidas,
+        'productos_json': json.dumps(productos, cls=DjangoJSONEncoder)
     })
+
 
 
 
@@ -275,3 +278,90 @@ def entradas_view(request):
     'productos': productos,
     'productos_json': json.dumps(productos_serializados, cls=DjangoJSONEncoder)
 })
+
+
+def salidas_view(request):
+    productos = Producto.objects.all()
+    salidas = Salida.objects.select_related('producto').order_by('-fecha')
+    productos_json = [
+        {
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'codigo': producto.codigo,
+            'proveedor': producto.proveedor
+        }
+        for producto in productos
+    ]
+    return render(request, 'salidas.html', {
+        'productos': productos,
+        'salidas': salidas,
+        'productos_json': productos_json
+    })
+
+
+def registrar_salida(request):
+    if request.method == 'POST':
+        nombre_producto = request.POST.get('producto_nombre')
+        cantidad = request.POST.get('cantidad')
+
+        try:
+            producto = Producto.objects.get(nombre=nombre_producto)
+            Salida.objects.create(
+                producto=producto,
+                cantidad=cantidad,
+                fecha=timezone.now()
+            )
+            return redirect('registrar_salida')
+        except Producto.DoesNotExist:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=400)
+
+    return redirect('registrar_salida')
+
+
+@csrf_exempt
+def actualizar_cantidad_salida(request):
+    if request.method == 'POST':
+        salida_id = request.POST.get('salida_id')
+        nueva_cantidad = request.POST.get('cantidad')
+
+        try:
+            salida = Salida.objects.get(id=salida_id)
+            salida.cantidad = nueva_cantidad
+            salida.save()
+            return JsonResponse({'success': True})
+        except Salida.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Salida no encontrada'})
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
+@csrf_exempt
+def actualizar_producto_salida(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        salida_id = data.get('salida_id')
+        nuevo_nombre = data.get('nuevo_producto')
+
+        try:
+            producto = Producto.objects.get(nombre=nuevo_nombre)
+            salida = Salida.objects.get(id=salida_id)
+            salida.producto = producto
+            salida.save()
+            return JsonResponse({'status': 'ok'})
+        except (Producto.DoesNotExist, Salida.DoesNotExist):
+            return JsonResponse({'status': 'error', 'message': 'Error al actualizar'})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+
+@csrf_exempt
+def eliminar_salida(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        salida_id = data.get('salida_id')
+
+        try:
+            salida = Salida.objects.get(id=salida_id)
+            salida.delete()
+            return JsonResponse({'success': True})
+        except Salida.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Salida no encontrada'})
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})

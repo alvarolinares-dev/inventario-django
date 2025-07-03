@@ -23,4 +23,8 @@ urlpatterns = [
     # Salidas
     path('salidas/', views.registrar_salida, name= 'registrar_salida'),
     path('salidas/importar/', views.importar_salidas, name='importar_salidas'),
+    path('salidas/actualizar_cantidad/', views.actualizar_cantidad_salida, name='actualizar_cantidad_salida'),
+    path('salidas/actualizar-producto/', views.actualizar_producto_salida, name='actualizar_producto_salida'),
+    path('salidas/eliminar/', views.eliminar_salida, name='eliminar_salida'),
+
 ]
