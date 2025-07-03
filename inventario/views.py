@@ -6,6 +6,8 @@ from django.db.models import Sum
 from .forms import EntradaForm, SalidaForm
 from django.http import JsonResponse
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 # Create your views here.
@@ -210,3 +212,48 @@ def importar_salidas(request):
                 except Producto.DoesNotExist:
                     continue
         return redirect('registrar_salida')
+
+
+def actualizar_cantidad(request):
+    if request.method == 'POST':
+        entrada_id = request.POST.get('entrada_id')
+        nueva_cantidad = request.POST.get('cantidad')
+
+        try:
+            entrada = Entrada.objects.get(pk=entrada_id)
+            entrada.cantidad = nueva_cantidad
+            entrada.save()
+            return JsonResponse({'success': True})
+        except Entrada.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Entrada no encontrada'})
+
+    return JsonResponse({'success': False, 'error': 'Método inválido'})
+
+@csrf_exempt
+def actualizar_producto_entrada(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        entrada_id = data.get('entrada_id')
+        nuevo_nombre = data.get('nuevo_producto')
+
+        try:
+            entrada = Entrada.objects.get(id=entrada_id)
+            producto = Producto.objects.get(nombre=nuevo_nombre)
+            entrada.producto = producto
+            entrada.save()
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        
+@csrf_exempt
+def eliminar_entrada_ajax(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        entrada_id = data.get("id")
+        try:
+            entrada = Entrada.objects.get(id=entrada_id)
+            entrada.delete()
+            return JsonResponse({"status": "ok"})
+        except Entrada.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Entrada no encontrada"})
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)

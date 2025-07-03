@@ -14,5 +14,10 @@ urlpatterns = [
     path('entradas/', views.registrar_entrada, name='registrar_entrada'),
     path('entradas/importar/', views.importar_entradas, name='importar_entradas'),
     path('salidas/importar/', views.importar_salidas, name='importar_salidas'),
+    path('entradas/actualizar_cantidad/', views.actualizar_cantidad, name='actualizar_cantidad'),
+    path('entradas/actualizar-producto/', views.actualizar_producto_entrada, name='actualizar_producto_entrada'),
+    path('entradas/eliminar/', views.eliminar_entrada_ajax, name='eliminar_entrada_ajax'),
+
+
 ]
 

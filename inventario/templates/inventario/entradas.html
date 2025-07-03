@@ -19,17 +19,35 @@
             <th class="py-2 px-4 text-left">Cantidad</th>
             <th class="py-2 px-4 text-left">Proveedor</th>
             <th class="py-2 px-4 text-left">Fecha</th>
+            <th class="py-2 px-4 text-left">Acciones</th>
         </tr>
     </thead>
     <tbody>
         {% for entrada in entradas %}
         <tr class="border-b hover: bg-gray-100">
-            <td class="py-2 px-4">{{ entrada.producto.nombre }}</td>
-            <td class="py-2 px-4">{{ entrada.producto.codigo }}</td>
-            <td class="py-2 px-4">{{ entrada.cantidad }}</td>
-            <td class="py-2 px-4">{{ entrada.producto.proveedor }}</td>
+            <td class="py-2 px-4">
+              <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
+                {% for producto in productos %}
+                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nomnbre %}selected{% endif %}>
+                    {{ producto.nombre }}
+                  </option>
+                {% endfor %}   
+              </select>
+            </td>
+            <td class="py-2 px-4" id="codigo_{{ entrada.id }}">{{ entrada.producto.codigo }}</td>
+            <td class="py-2 px-4">
+              <input type="number" value="{{ entrada.cantidad }}"
+                    class="border- rounded px-2 py-1 w-20"
+                    onchange="guardarCantidad({{ entrada.id }}, this.value)">
+            </td>
+            <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
         </tr>
+        <td class="py-2 px-4">
+          <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm">
+            Eliminar
+          </button>
+        </td>
         {% empty %}
         <tr><td colspan="3" class="text-center py-4">No hay entradas registradas.</td></tr>
         {% endfor %}
@@ -114,5 +132,122 @@ function cerrarModalImportarEntrada() {
     }
   });
 </script>
+
+<script>
+function guardarCantidad(entradaId, cantidad) {
+  fetch("{% url 'actualizar_cantidad' %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `entrada_id=${entradaId}&cantidad=${cantidad}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Error al actualizar la cantidad");
+    }
+  });
+}
+</script>
+
+<script>
+const productosData = {{ productos|safe }};
+
+function actualizarProducto(selectElement, entradaId) {
+  const nombreSeleccionado = selectElement.value;
+  const producto = productosData.find(p => p.nombre === nombreSeleccionado);
+
+  if (producto) {
+    // Actualiza visualmente
+    document.getElementById(`codigo_${entradaId}`).textContent = producto.codigo;
+    document.getElementById(`proveedor_${entradaId}`).textContent = producto.proveedor;
+
+    // Envía al servidor
+    enviarCambioProducto(entradaId, nombreSeleccionado);
+  }
+}
+
+function enviarCambioProducto(entradaId, nuevoNombre) {
+  fetch("{% url 'actualizar_producto_entrada' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      entrada_id: entradaId,
+      nuevo_producto: nuevoNombre
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Error al actualizar');
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.status === 'ok') {
+      console.log('Producto actualizado correctamente');
+    } else {
+      alert('No se pudo actualizar: ' + data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error al guardar:', error);
+    alert('Error al guardar');
+  });
+}
+
+// Función para obtener el CSRF token
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
+<script>
+function eliminarEntrada(entradaId) {
+  if (!confirm("¿Estás seguro de que deseas eliminar esta entrada?")) {
+    return;
+  }
+
+  fetch("{% url 'eliminar_entrada_ajax' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    body: JSON.stringify({ id: entradaId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === "ok") {
+      // Elimina visualmente la fila
+      const fila = document.querySelector(`button[onclick="eliminarEntrada(${entradaId})"]`).closest("tr");
+      fila.remove();
+    } else {
+      alert("Error al eliminar la entrada.");
+    }
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert("Ocurrió un error al eliminar.");
+  });
+}
+</script>
+
+
 
 {% endblock %}
