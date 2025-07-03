@@ -20,7 +20,6 @@ urlpatterns = [
     path('entradas/actualizar-producto/', views.actualizar_producto_entrada, name='actualizar_producto_entrada'),
     path('entradas/eliminar/', views.eliminar_entrada, name='eliminar_entrada'),
 
-    # Salidas
    # Salidas
     path('salidas/', views.salidas_view, name='salidas_view'),  
     path('registrar_salida/', views.registrar_salida, name='registrar_salida'),  

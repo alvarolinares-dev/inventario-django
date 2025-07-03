@@ -48,17 +48,17 @@ def registrar_entrada(request):
         except Producto.DoesNotExist:
             messages.error(request, 'Producto no encontrado')
 
-        return redirect('entradas_view')  # ✅ redirige a la vista de lista
+        return redirect('entradas_view')
 
-    return redirect('entradas_view')
-
-
+    # Si es GET, renderiza normalmente
     productos = list(Producto.objects.values('nombre', 'codigo', 'proveedor'))
     entradas = Entrada.objects.all().order_by('-fecha')
     return render(request, 'inventario/entradas.html', {
         'productos': productos,
-        'entradas': entradas
+        'entradas': entradas,
+        'productos_json': json.dumps(productos, cls=DjangoJSONEncoder)
     })
+
 
 
     
