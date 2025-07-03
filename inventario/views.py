@@ -281,20 +281,13 @@ def entradas_view(request):
 
 
 def salidas_view(request):
+    salidas = Salida.objects.all().order_by('-fecha')
     productos = Producto.objects.all()
-    salidas = Salida.objects.select_related('producto').order_by('-fecha')
-    productos_json = [
-        {
-            'id': producto.id,
-            'nombre': producto.nombre,
-            'codigo': producto.codigo,
-            'proveedor': producto.proveedor
-        }
-        for producto in productos
-    ]
+    productos_json = list(productos.values("nombre", "codigo", "proveedor"))
+
     return render(request, 'salidas.html', {
-        'productos': productos,
         'salidas': salidas,
+        'productos': productos,
         'productos_json': productos_json
     })
 

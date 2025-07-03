@@ -21,7 +21,8 @@ urlpatterns = [
     path('entradas/eliminar/', views.eliminar_entrada, name='eliminar_entrada'),
 
     # Salidas
-    path('salidas/', views.registrar_salida, name= 'registrar_salida'),
+    path('salidas/', views.salidas_view, name= 'salidas'),
+    path('salidas/registrar/', views.registrar_salida, name='registrar_salida'),
     path('salidas/importar/', views.importar_salidas, name='importar_salidas'),
     path('salidas/actualizar_cantidad/', views.actualizar_cantidad_salida, name='actualizar_cantidad_salida'),
     path('salidas/actualizar-producto/', views.actualizar_producto_salida, name='actualizar_producto_salida'),
