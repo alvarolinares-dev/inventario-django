@@ -28,7 +28,7 @@
             <td class="py-2 px-4">
               <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
                 {% for producto in productos %}
-                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nomnbre %}selected{% endif %}>
+                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nombre %}selected{% endif %}>
                     {{ producto.nombre }}
                   </option>
                 {% endfor %}   
@@ -44,9 +44,7 @@
             <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
         </tr>
         <td class="py-2 px-4">
-          <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-sm">
-            Eliminar
-          </button>
+          <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
         </td>
         {% empty %}
         <tr><td colspan="3" class="text-center py-4">No hay entradas registradas.</td></tr>
@@ -118,7 +116,7 @@ function cerrarModalImportarEntrada() {
 </script>
 
 <script>
-  const productosData = {{ productos|safe }};
+  const productosData = {{ productos_json|safe }};
 
   document.getElementById('producto_nombre').addEventListener('input', function () {
     const nombre = this.value;
@@ -153,8 +151,6 @@ function guardarCantidad(entradaId, cantidad) {
 </script>
 
 <script>
-const productosData = {{ productos|safe }};
-
 function actualizarProducto(selectElement, entradaId) {
   const nombreSeleccionado = selectElement.value;
   const producto = productosData.find(p => p.nombre === nombreSeleccionado);
@@ -219,34 +215,27 @@ function getCookie(name) {
 
 <script>
 function eliminarEntrada(entradaId) {
-  if (!confirm("¿Estás seguro de que deseas eliminar esta entrada?")) {
-    return;
-  }
+  if (!confirm("¿Estás seguro de que deseas eliminar esta entrada?")) return;
 
-  fetch("{% url 'eliminar_entrada_ajax' %}", {
+  fetch("{% url 'eliminar_entrada' %}", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken")
+      "X-CSRFToken": getCookie('csrftoken'),
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify({ id: entradaId })
+    body: JSON.stringify({ entrada_id: entradaId })
   })
   .then(response => response.json())
   .then(data => {
-    if (data.status === "ok") {
-      // Elimina visualmente la fila
-      const fila = document.querySelector(`button[onclick="eliminarEntrada(${entradaId})"]`).closest("tr");
-      fila.remove();
+    if (data.success) {
+      location.reload(); // Recarga la página para reflejar el cambio
     } else {
-      alert("Error al eliminar la entrada.");
+      alert("Error al eliminar");
     }
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    alert("Ocurrió un error al eliminar.");
   });
 }
 </script>
+
 
 
 

@@ -7,8 +7,8 @@ from .forms import EntradaForm, SalidaForm
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-
-
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 # Create your views here.
 def inicio(request):
@@ -214,46 +214,64 @@ def importar_salidas(request):
         return redirect('registrar_salida')
 
 
+@csrf_exempt
 def actualizar_cantidad(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         entrada_id = request.POST.get('entrada_id')
-        nueva_cantidad = request.POST.get('cantidad')
+        cantidad = request.POST.get('cantidad')
 
         try:
-            entrada = Entrada.objects.get(pk=entrada_id)
-            entrada.cantidad = nueva_cantidad
+            entrada = Entrada.objects.get(id=entrada_id)
+            entrada.cantidad = cantidad
             entrada.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({"success": True})
         except Entrada.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Entrada no encontrada'})
+            return JsonResponse({"success": False, "error": "Entrada no encontrada"})
 
-    return JsonResponse({'success': False, 'error': 'Método inválido'})
+    return JsonResponse({"success": False, "error": "Método inválido"})
+
 
 @csrf_exempt
 def actualizar_producto_entrada(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        entrada_id = data.get('entrada_id')
-        nuevo_nombre = data.get('nuevo_producto')
-
         try:
+            data = json.loads(request.body)
+            entrada_id = data['entrada_id']
+            nuevo_producto = data['nuevo_producto']
+
             entrada = Entrada.objects.get(id=entrada_id)
-            producto = Producto.objects.get(nombre=nuevo_nombre)
+            producto = Producto.objects.get(nombre=nuevo_producto)
+
             entrada.producto = producto
             entrada.save()
             return JsonResponse({'status': 'ok'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
         
 @csrf_exempt
-def eliminar_entrada_ajax(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        entrada_id = data.get("id")
+def eliminar_entrada(request):
+    if request.method == 'POST':
         try:
+            data = json.loads(request.body)
+            entrada_id = data['entrada_id']
             entrada = Entrada.objects.get(id=entrada_id)
             entrada.delete()
-            return JsonResponse({"status": "ok"})
+            return JsonResponse({'success': True})
         except Entrada.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Entrada no encontrada"})
-    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+            return JsonResponse({'success': False, 'message': 'Entrada no encontrada'})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
+def entradas_view(request):
+    productos = Producto.objects.all()
+    entradas = Entrada.objects.select_related('producto').all()
+    productos_serializados = list(productos.values('nombre', 'codigo', 'proveedor'))
+
+    return render(request, 'inventario/entradas.html', {
+    'entradas': entradas,
+    'productos': productos,
+    'productos_json': json.dumps(productos_serializados, cls=DjangoJSONEncoder)
+})
