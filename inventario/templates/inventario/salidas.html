@@ -39,7 +39,7 @@
             </td>
             <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
-            <td class="py-2 px-4" acciones-salida hidden>
+            <td class="py-2 px-4 acciones-salida hidden">
                 <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
             </td>
         </tr>
