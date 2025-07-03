@@ -3,12 +3,11 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-4"> Entradas de Productos al Almacén</h1>
-
+<h1 class="text-2xl font-bold mb-4">Entradas de Productos al Almacén</h1>
 
 <div class="flex space-x-4 mb-6">
-    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover: bg-green-700"> Agregar Entrada</button>
-    <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover: bg-blue-700"> Importar entradas desde excel</button>
+    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar Entrada</button>
+    <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar entradas desde Excel</button>
 </div>
 
 <table class="min-w-full bg-white shadow rounded-lg">
@@ -28,128 +27,129 @@
             <td class="py-2 px-4">
               <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
                 {% for producto in productos %}
-                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nombre %}selected{% endif %}>
-                    {{ producto.nombre }}
-                  </option>
-                {% endfor %}   
+                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
+                {% endfor %}
               </select>
             </td>
             <td class="py-2 px-4" id="codigo_{{ entrada.id }}">{{ entrada.producto.codigo }}</td>
             <td class="py-2 px-4">
-              <input type="number" value="{{ entrada.cantidad }}"
-                    class="border- rounded px-2 py-1 w-20"
-                    onchange="guardarCantidad({{ entrada.id }}, this.value)">
+              <input type="number" value="{{ entrada.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidad({{ entrada.id }}, this.value)">
             </td>
             <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
-          <td class="py-2 px-4">
-            <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
-          </td>
+            <td class="py-2 px-4">
+              <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
+            </td>
         </tr>
         {% empty %}
-        <tr><td colspan="3" class="text-center py-4">No hay entradas registradas.</td></tr>
+        <tr><td colspan="6" class="text-center py-4">No hay entradas registradas.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
-
-<!-- Modal de Registrar Entrada -->
-<div id="modalEntrada" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-    <button onclick="cerrarModalEntrada()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
-      ✕
-    </button>
+<!-- ✅ MODAL POPUP: Registrar Entrada -->
+<div id="modalEntrada" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalEntrada()">&times;</span>
     <h2 class="text-xl font-bold mb-4">Registrar Entrada</h2>
-
-    <form method="POST" action="{% url 'registrar_entrada_post' %}">
+    <form method="post" action="{% url 'registrar_entrada_post' %}">
       {% csrf_token %}
 
-      <!-- Producto -->
-      <label for="producto_nombre" class="block mb-1">Producto:</label>
-      <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos"
-             class="w-full border border-gray-300 rounded px-3 py-2 mb-3" required>
+      <label>Producto:</label>
+      <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos" class="form-control w-full mb-2" required>
       <datalist id="lista_productos">
         {% for producto in productos %}
           <option value="{{ producto.nombre }}">
         {% endfor %}
       </datalist>
 
-      <!-- Código y proveedor -->
-      <p class="text-sm text-gray-600 mb-2"><strong>Código:</strong> <span id="producto_codigo">---</span></p>
-      <p class="text-sm text-gray-600 mb-4"><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+      <p class="text-sm mb-1"><strong>Código:</strong> <span id="producto_codigo">---</span></p>
+      <p class="text-sm mb-4"><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
 
-      <!-- Cantidad -->
-      <label for="cantidad" class="block mb-1">Cantidad:</label>
-      <input type="number" name="cantidad" class="w-full border border-gray-300 rounded px-3 py-2 mb-4" required>
+      <label>Cantidad:</label>
+      <input type="number" name="cantidad" class="form-control w-full mb-4" required>
 
-      <!-- Botón registrar -->
-      <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-        Registrar Entrada
-      </button>
+      <button type="submit" class="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700">Registrar Entrada</button>
     </form>
   </div>
 </div>
 
-
-<!--Modal AbrirImportarModal()-->
-<div id="modalImportarEntrada" class="modal" style="display:none;">
+<!-- ✅ MODAL POPUP: Importar Entrada -->
+<div id="modalImportarEntrada" class="modal">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalImportarEntrada()">&times;</span>
-    <form method="POST" action="{% url 'importar_entradas' %}" enctype="multipart/form-data">
+    <h2 class="text-xl font-bold mb-4">Importar Entradas</h2>
+    <form method="post" action="{% url 'importar_entradas' %}" enctype="multipart/form-data">
       {% csrf_token %}
-      <label for="archivo_excel">Subir archivo Excel:</label>
-      <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required><br>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar</button>
+      <label>Archivo Excel:</label>
+      <input type="file" name="archivo_excel" accept=".xlsx" class="form-control mb-4" required>
+      <button type="submit" class="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700">Importar</button>
     </form>
   </div>
 </div>
 
+<!-- ✅ ESTILOS -->
+<style>
+.modal {
+  position: fixed;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+.close:hover {
+  color: black;
+}
+</style>
 
-<!-- JS para abrir/cerrar los modales con Tailwind -->
+<!-- ✅ SCRIPTS DE FUNCIONALIDAD -->
 <script>
 function abrirModalEntrada() {
-    const modal = document.getElementById("modalEntrada");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+  document.getElementById("modalEntrada").style.display = "flex";
 }
-
 function cerrarModalEntrada() {
-    const modal = document.getElementById("modalEntrada");
-    modal.classList.remove("flex");
-    modal.classList.add("hidden");
+  document.getElementById("modalEntrada").style.display = "none";
 }
-
 function abrirModalImportarEntrada() {
-    const modal = document.getElementById("modalImportarEntrada");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+  document.getElementById("modalImportarEntrada").style.display = "flex";
 }
-
 function cerrarModalImportarEntrada() {
-    const modal = document.getElementById("modalImportarEntrada");
-    modal.classList.remove("flex");
-    modal.classList.add("hidden");
+  document.getElementById("modalImportarEntrada").style.display = "none";
 }
-</script>
 
+const productosData = {{ productos_json|safe }};
+document.getElementById('producto_nombre').addEventListener('input', function () {
+  const nombre = this.value;
+  const producto = productosData.find(p => p.nombre === nombre);
+  if (producto) {
+    document.getElementById('producto_codigo').textContent = producto.codigo;
+    document.getElementById('producto_proveedor').textContent = producto.proveedor;
+  } else {
+    document.getElementById('producto_codigo').textContent = '---';
+    document.getElementById('producto_proveedor').textContent = '---';
+  }
+});
 
-<script>
-  const productosData = {{ productos_json|safe }};
-
-  document.getElementById('producto_nombre').addEventListener('input', function () {
-    const nombre = this.value;
-    const producto = productosData.find(p => p.nombre === nombre);
-    if (producto) {
-      document.getElementById('producto_codigo').textContent = producto.codigo;
-      document.getElementById('producto_proveedor').textContent = producto.proveedor;
-    } else {
-      document.getElementById('producto_codigo').textContent = '---';
-      document.getElementById('producto_proveedor').textContent = '---';
-    }
-  });
-</script>
-
-<script>
 function guardarCantidad(entradaId, cantidad) {
   fetch("{% url 'actualizar_cantidad' %}", {
     method: "POST",
@@ -166,74 +166,37 @@ function guardarCantidad(entradaId, cantidad) {
     }
   });
 }
-</script>
 
-<script>
 function actualizarProducto(selectElement, entradaId) {
   const nombreSeleccionado = selectElement.value;
   const producto = productosData.find(p => p.nombre === nombreSeleccionado);
 
   if (producto) {
-    // Actualiza visualmente
     document.getElementById(`codigo_${entradaId}`).textContent = producto.codigo;
     document.getElementById(`proveedor_${entradaId}`).textContent = producto.proveedor;
 
-    // Envía al servidor
-    enviarCambioProducto(entradaId, nombreSeleccionado);
-  }
-}
-
-function enviarCambioProducto(entradaId, nuevoNombre) {
-  fetch("{% url 'actualizar_producto_entrada' %}", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken')
-    },
-    body: JSON.stringify({
-      entrada_id: entradaId,
-      nuevo_producto: nuevoNombre
+    fetch("{% url 'actualizar_producto_entrada' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({
+        entrada_id: entradaId,
+        nuevo_producto: nombreSeleccionado
+      })
     })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Error al actualizar');
-    }
-    return response.json();
-  })
-  .then(data => {
-    if (data.status === 'ok') {
-      console.log('Producto actualizado correctamente');
-    } else {
-      alert('No se pudo actualizar: ' + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error al guardar:', error);
-    alert('Error al guardar');
-  });
-}
-
-// Función para obtener el CSRF token
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
+    .then(response => response.json())
+    .then(data => {
+      if (data.status !== 'ok') {
+        alert('Error al actualizar producto');
       }
-    }
+    });
   }
-  return cookieValue;
 }
-</script>
 
-<script>
 function eliminarEntrada(entradaId) {
-  if (!confirm("¿Estás seguro de que deseas eliminar esta entrada?")) return;
+  if (!confirm("¿Deseas eliminar esta entrada?")) return;
 
   fetch("{% url 'eliminar_entrada' %}", {
     method: "POST",
@@ -246,15 +209,27 @@ function eliminarEntrada(entradaId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      location.reload(); // Recarga la página para reflejar el cambio
+      location.reload();
     } else {
       alert("Error al eliminar");
     }
   });
 }
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 </script>
-
-
-
 
 {% endblock %}
