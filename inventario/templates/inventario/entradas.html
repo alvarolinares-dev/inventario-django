@@ -105,21 +105,33 @@
 </div>
 
 
-<!--JS Modal Entrada-->
+<!-- JS para abrir/cerrar los modales con Tailwind -->
 <script>
 function abrirModalEntrada() {
-    document.getElementById("modalEntrada").style.display = "flex";
+    const modal = document.getElementById("modalEntrada");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
 }
+
 function cerrarModalEntrada() {
-    document.getElementById("modalEntrada").style.display = "none";
+    const modal = document.getElementById("modalEntrada");
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
 }
+
 function abrirModalImportarEntrada() {
-    document.getElementById("modalImportarEntrada").style.display = "flex";
+    const modal = document.getElementById("modalImportarEntrada");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
 }
+
 function cerrarModalImportarEntrada() {
-    document.getElementById("modalImportarEntrada").style.display = "none";
+    const modal = document.getElementById("modalImportarEntrada");
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
 }
 </script>
+
 
 <script>
   const productosData = {{ productos_json|safe }};
