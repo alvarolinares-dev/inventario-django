@@ -46,10 +46,12 @@ def registrar_entrada(request):
             producto = Producto.objects.get(nombre=nombre_producto)
             Entrada.objects.create(producto=producto, cantidad=cantidad)
         except Producto.DoesNotExist:
-            
-            pass
+            messages.error(request, 'Producto no encontrado')
 
-        return redirect('registrar_entrada')
+        return redirect('entradas_view')  # ✅ redirige a la vista de lista
+
+    return redirect('entradas_view')
+
 
     productos = list(Producto.objects.values('nombre', 'codigo', 'proveedor'))
     entradas = Entrada.objects.all().order_by('-fecha')
@@ -279,14 +281,15 @@ def eliminar_entrada(request):
 
 def entradas_view(request):
     productos = Producto.objects.all()
-    entradas = Entrada.objects.select_related('producto').all()
+    entradas = Entrada.objects.select_related('producto').all().order_by('-fecha')  
     productos_serializados = list(productos.values('nombre', 'codigo', 'proveedor'))
 
     return render(request, 'inventario/entradas.html', {
-    'entradas': entradas,
-    'productos': productos,
-    'productos_json': json.dumps(productos_serializados, cls=DjangoJSONEncoder)
-})
+        'entradas': entradas,
+        'productos': productos,
+        'productos_json': json.dumps(productos_serializados, cls=DjangoJSONEncoder)
+    })
+
 
 
 def salidas_view(request):

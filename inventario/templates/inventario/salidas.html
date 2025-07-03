@@ -39,7 +39,7 @@
             </td>
             <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
-            <td class="py-2 px-4">
+            <td class="py-2 px-4" acciones-salida hidden>
                 <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
             </td>
         </tr>
@@ -219,19 +219,17 @@ function getCookie(name) {
 
 <script>
 function alternarEdicion() {
-    const botones = document.querySelectorAll('.acciones-salida');
-    const inputs = document.querySelectorAll('select, input[type=number]');
+    const acciones = document.querySelectorAll('.acciones-salida');
+    const campos = document.querySelectorAll('select, input[type="number"]');
 
-    botones.forEach(btn => btn.classList.toggle('hidden'));
-    inputs.forEach(inp => {
-        if (inp.hasAttribute('disabled')) {
-            inp.removeAttribute('disabled');
-        } else {
-            inp.setAttribute('disabled', 'disabled');
-        }
+    acciones.forEach(el => el.classList.toggle('hidden'));
+
+    campos.forEach(inp => {
+        inp.disabled = !inp.disabled;
     });
 }
 </script>
+
 
 <script>
 function abrirModalImportarSalida() {
