@@ -52,7 +52,7 @@
   <div class="modal-content">
     <span class="close" onclick="cerrarModalEntrada()">&times;</span>
     <h2 class="text-xl font-bold mb-4">Registrar Entrada</h2>
-    <form method="post" action="{% url 'registrar_entrada_post' %}">
+    <form method="post" action="{% url 'registrar_entrada' %}">
       {% csrf_token %}
 
       <label>Producto:</label>
