@@ -13,7 +13,7 @@ urlpatterns = [
     path('importar/', views.importar_productos, name='importar_productos'),
 
     # Entradas
-    path('entradas/', views.entradas_view, name='registrar_entrada'),  
+    path('entradas/', views.entradas_view, name='entradas_view'),  
     path('registrar_entrada/', views.registrar_entrada, name='registrar_entrada_post'),  
     path('entradas/importar/', views.importar_entradas, name='importar_entradas'),
     path('entradas/actualizar_cantidad/', views.actualizar_cantidad, name='actualizar_cantidad'),
