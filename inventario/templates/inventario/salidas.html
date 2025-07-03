@@ -5,8 +5,12 @@
 <h1 class="text-2xl font-bold mb-4">Salidas de Productos del Almacén</h1>
 
 <div class="flex space-x-4 mb-6">
-    <button onclick="abrirModalSalida()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar Salida</button>
+    <button onclick="abrirModalSalida()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Agregar Salida</button>
+    <button onclick="abrirModalImportarSalida()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Importar Excel</button>
+    <button onclick="alternarEdicion()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
+     
 </div>
+
 
 <table class="min-w-full bg-white shadow rounded-lg">
     <thead>
@@ -23,7 +27,7 @@
         {% for salida in salidas %}
         <tr class="border-b hover:bg-gray-100">
             <td class="py-2 px-4">
-                <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm">
+                <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm" disabled>
                     {% for producto in productos %}
                         <option value="{{ producto.nombre }}" {% if salida.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
                     {% endfor %}
@@ -31,7 +35,7 @@
             </td>
             <td class="py-2 px-4" id="codigo_{{ salida.id }}">{{ salida.producto.codigo }}</td>
             <td class="py-2 px-4">
-                <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)">
+                <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)" disabled>
             </td>
             <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
             <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
@@ -72,6 +76,22 @@
             <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Registrar Salida</button>
         </form>
     </div>
+</div>
+
+<!-- Modal Importar Excel -->
+<div id="modalImportarSalida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+    <button onclick="cerrarModalImportarSalida()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
+    <h2 class="text-xl font-bold mb-4">Importar Salidas desde Excel</h2>
+
+    <form method="POST" action="{% url 'importar_salidas' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="archivo_excel" class="block mb-2 font-medium">Selecciona un archivo .xlsx</label>
+      <input type="file" name="archivo_excel" accept=".xlsx" required class="mb-4">
+
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Importar</button>
+    </form>
+  </div>
 </div>
 
 <!-- JS para mostrar info producto -->
@@ -196,5 +216,34 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
+
+<script>
+function alternarEdicion() {
+    const botones = document.querySelectorAll('.acciones-salida');
+    const inputs = document.querySelectorAll('select, input[type=number]');
+
+    botones.forEach(btn => btn.classList.toggle('hidden'));
+    inputs.forEach(inp => {
+        if (inp.hasAttribute('disabled')) {
+            inp.removeAttribute('disabled');
+        } else {
+            inp.setAttribute('disabled', 'disabled');
+        }
+    });
+}
+</script>
+
+<script>
+function abrirModalImportarSalida() {
+    document.getElementById('modalImportarSalida').style.display = 'flex';
+}
+function cerrarModalImportarSalida() {
+    document.getElementById('modalImportarSalida').style.display = 'none';
+}
+</script>
+
+
+
+
 
 {% endblock %}

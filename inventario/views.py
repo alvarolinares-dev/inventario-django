@@ -204,17 +204,26 @@ def importar_entradas(request):
 
 
 def importar_salidas(request):
-    if request.method == 'POST':
-        archivo =  request.FILES.get('archivo_excel')
-        if archivo:
+    if request.method == 'POST' and request.FILES.get('archivo_excel'):
+        archivo = request.FILES['archivo_excel']
+        try:
             df = pd.read_excel(archivo)
-            for _, row in df.iterrows():
+
+            for index, row in df.iterrows():
+                codigo = str(row.get('codigo')).strip()
+                cantidad = int(row.get('cantidad'))
+
                 try:
-                    producto = Producto.objects.get(codigo=row['codigo'])
-                    Salida.objects.create(producto=producto, cantidad=int(row['cantidad']))
+                    producto = Producto.objects.get(codigo=codigo)
+                    Salida.objects.create(producto=producto, cantidad=cantidad)
                 except Producto.DoesNotExist:
-                    continue
-        return redirect('registrar_salida')
+                    messages.warning(request, f"Producto con código '{codigo}' no encontrado. Fila {index+2}")
+
+            messages.success(request, "Importación completada correctamente.")
+        except Exception as e:
+            messages.error(request, f"Error al procesar archivo: {str(e)}")
+
+    return redirect('salidas_view')
 
 
 @csrf_exempt
