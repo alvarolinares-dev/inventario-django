@@ -295,16 +295,31 @@ def salidas_view(request):
 
 def registrar_salida(request):
     if request.method == 'POST':
-        producto_nombre = request.POST.get("producto_nombre")
+        producto_nombre = request.POST.get("producto_nombre", "").strip()
         cantidad = request.POST.get("cantidad")
 
+        # Validación de cantidad
+        try:
+            cantidad = int(cantidad)
+            if cantidad <= 0:
+                raise ValueError("Cantidad inválida")
+        except:
+            messages.error(request, "Cantidad inválida. Debe ser un número positivo.")
+            return redirect('salidas_view')
+
+        # Validación de producto
         try:
             producto = Producto.objects.get(nombre=producto_nombre)
-            Salida.objects.create(producto=producto, cantidad=cantidad)
         except Producto.DoesNotExist:
-            messages.error(request, "Producto no encontrado")
+            messages.error(request, f"Producto '{producto_nombre}' no encontrado.")
+            return redirect('salidas_view')
 
-    return redirect('salidas_view')  # Redirige a la vista que muestra la tabla
+        # Crear salida
+        Salida.objects.create(producto=producto, cantidad=cantidad)
+        messages.success(request, "Salida registrada exitosamente.")
+        return redirect('salidas_view')
+
+    return redirect('salidas_view')
 
 
 
