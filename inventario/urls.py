@@ -13,19 +13,21 @@ urlpatterns = [
     path('importar/', views.importar_productos, name='importar_productos'),
 
     # Entradas
-    path('entradas/', views.entradas_view, name='registrar_entrada'),  # Página principal
-    path('registrar_entrada/', views.registrar_entrada, name='registrar_entrada_post'),  # Para formulario POST
+    path('entradas/', views.entradas_view, name='registrar_entrada'),  
+    path('registrar_entrada/', views.registrar_entrada, name='registrar_entrada_post'),  
     path('entradas/importar/', views.importar_entradas, name='importar_entradas'),
     path('entradas/actualizar_cantidad/', views.actualizar_cantidad, name='actualizar_cantidad'),
     path('entradas/actualizar-producto/', views.actualizar_producto_entrada, name='actualizar_producto_entrada'),
     path('entradas/eliminar/', views.eliminar_entrada, name='eliminar_entrada'),
 
     # Salidas
-    path('salidas/', views.salidas_view, name= 'salidas'),
-    path('salidas/registrar/', views.registrar_salida, name='registrar_salida'),
+   # Salidas
+    path('salidas/', views.salidas_view, name='salidas_view'),  
+    path('registrar_salida/', views.registrar_salida, name='registrar_salida'),  
     path('salidas/importar/', views.importar_salidas, name='importar_salidas'),
     path('salidas/actualizar_cantidad/', views.actualizar_cantidad_salida, name='actualizar_cantidad_salida'),
     path('salidas/actualizar-producto/', views.actualizar_producto_salida, name='actualizar_producto_salida'),
     path('salidas/eliminar/', views.eliminar_salida, name='eliminar_salida'),
+
 
 ]

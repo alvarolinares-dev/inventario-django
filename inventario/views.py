@@ -281,26 +281,32 @@ def entradas_view(request):
 
 
 def salidas_view(request):
-    salidas = Salida.objects.all().order_by('-fecha')
     productos = Producto.objects.all()
-    productos_json = list(productos.values("nombre", "codigo", "proveedor"))
+    salidas = Salida.objects.all().order_by('-fecha')
+    productos_json = json.dumps(list(productos.values("nombre", "codigo", "proveedor")), cls=DjangoJSONEncoder)
 
-    return render(request, 'salidas.html', {
+    return render(request, 'inventario/salidas.html', {
         'salidas': salidas,
         'productos': productos,
         'productos_json': productos_json
     })
 
 
+
 def registrar_salida(request):
     if request.method == 'POST':
-        producto_nombre = request.POST.get('producto_nombre')
-        cantidad = request.POST.get('cantidad')
+        producto_nombre = request.POST.get("producto_nombre")
+        cantidad = request.POST.get("cantidad")
 
-        producto = Producto.objects.get(nombre=producto_nombre)
-        Salida.objects.create(producto=producto, cantidad=cantidad)
+        try:
+            producto = Producto.objects.get(nombre=producto_nombre)
+            Salida.objects.create(producto=producto, cantidad=cantidad)
+        except Producto.DoesNotExist:
+            messages.error(request, "Producto no encontrado")
 
-    return redirect('salidas') 
+    return redirect('salidas_view')  # Redirige a la vista que muestra la tabla
+
+
 
 
 
