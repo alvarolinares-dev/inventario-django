@@ -53,33 +53,39 @@
 </table>
 
 
-<!--Modal AbrirModalEntrada()-->
-<div id="modalEntrada" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close" onclick="cerrarModalEntrada()">&times;</span>
-    <h5>Registrar Entrada</h5>
-    <form method="post" action="{% url 'registrar_entrada_post' %}">
+<!-- Modal de Registrar Entrada -->
+<div id="modalEntrada" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+    <button onclick="cerrarModalEntrada()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
+      ✕
+    </button>
+    <h2 class="text-xl font-bold mb-4">Registrar Entrada</h2>
+
+    <form method="POST" action="{% url 'registrar_entrada_post' %}">
       {% csrf_token %}
-      
-      <!-- Búsqueda del producto -->
-      <label for="producto_nombre">Producto:</label>
-      <input type="text" id="producto_nombre" name="producto_nombre" class="form-control" list="lista_productos" required>
+
+      <!-- Producto -->
+      <label for="producto_nombre" class="block mb-1">Producto:</label>
+      <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos"
+             class="w-full border border-gray-300 rounded px-3 py-2 mb-3" required>
       <datalist id="lista_productos">
         {% for producto in productos %}
           <option value="{{ producto.nombre }}">
         {% endfor %}
       </datalist>
-      
-      <!-- Campos automáticos que se rellenarán vía JavaScript -->
-      <p><strong>Código:</strong> <span id="producto_codigo">---</span></p>
-      <p><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
+
+      <!-- Código y proveedor -->
+      <p class="text-sm text-gray-600 mb-2"><strong>Código:</strong> <span id="producto_codigo">---</span></p>
+      <p class="text-sm text-gray-600 mb-4"><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
 
       <!-- Cantidad -->
-      <label for="cantidad">Cantidad:</label>
-      <input type="number" name="cantidad" class="form-control" required>
+      <label for="cantidad" class="block mb-1">Cantidad:</label>
+      <input type="number" name="cantidad" class="w-full border border-gray-300 rounded px-3 py-2 mb-4" required>
 
-      <br>
-      <button type="submit" class="btn btn-success">Registrar Entrada</button>
+      <!-- Botón registrar -->
+      <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Registrar Entrada
+      </button>
     </form>
   </div>
 </div>
