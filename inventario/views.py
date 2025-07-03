@@ -294,21 +294,14 @@ def salidas_view(request):
 
 def registrar_salida(request):
     if request.method == 'POST':
-        nombre_producto = request.POST.get('producto_nombre')
+        producto_nombre = request.POST.get('producto_nombre')
         cantidad = request.POST.get('cantidad')
 
-        try:
-            producto = Producto.objects.get(nombre=nombre_producto)
-            Salida.objects.create(
-                producto=producto,
-                cantidad=cantidad,
-                fecha=timezone.now()
-            )
-            return redirect('registrar_salida')
-        except Producto.DoesNotExist:
-            return JsonResponse({'error': 'Producto no encontrado'}, status=400)
+        producto = Producto.objects.get(nombre=producto_nombre)
+        Salida.objects.create(producto=producto, cantidad=cantidad)
 
-    return redirect('registrar_salida')
+    return redirect('salidas') 
+
 
 
 @csrf_exempt
