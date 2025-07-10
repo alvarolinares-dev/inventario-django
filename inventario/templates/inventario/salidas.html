@@ -2,16 +2,17 @@
 {% load static %}
 
 {% block content %}
+<!-- Título principal -->
 <h1 class="text-2xl font-bold mb-4">Salidas de Productos del Almacén</h1>
 
+<!-- Botones de acción -->
 <div class="flex space-x-4 mb-6">
     <button onclick="abrirModalSalida()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Agregar Salida</button>
     <button onclick="abrirModalImportarSalida()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Importar Excel</button>
     <button onclick="alternarEdicion()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
-     
 </div>
 
-
+<!-- Tabla de salidas registradas -->
 <table class="min-w-full bg-white shadow rounded-lg">
     <thead>
         <tr class="bg-gray-200 text-gray-700">
@@ -26,6 +27,7 @@
     <tbody>
         {% for salida in salidas %}
         <tr class="border-b hover:bg-gray-100">
+            <!-- Producto editable -->
             <td class="py-2 px-4">
                 <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm" disabled>
                     {% for producto in productos %}
@@ -33,12 +35,17 @@
                     {% endfor %}
                 </select>
             </td>
+            <!-- Código del producto -->
             <td class="py-2 px-4" id="codigo_{{ salida.id }}">{{ salida.producto.codigo }}</td>
+            <!-- Cantidad editable -->
             <td class="py-2 px-4">
                 <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)" disabled>
             </td>
+            <!-- Proveedor del producto -->
             <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
+            <!-- Fecha de la salida -->
             <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
+            <!-- Botón eliminar -->
             <td class="py-2 px-4 acciones-salida hidden">
                 <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
             </td>
@@ -49,18 +56,20 @@
     </tbody>
 </table>
 
-<!-- Modal de Registrar Salida -->
+<!-- MODAL: Registrar salida manual -->
 <div id="modalSalida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <!-- Botón de cerrar -->
         <button onclick="cerrarModalSalida()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
         <h2 class="text-xl font-bold mb-4">Registrar Salida</h2>
 
+        <!-- Formulario -->
         <form method="POST" action="{% url 'registrar_salida' %}">
             {% csrf_token %}
 
             <label for="producto_nombre" class="block mb-1">Producto:</label>
-            <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos"
-                   class="w-full border border-gray-300 rounded px-3 py-2 mb-3" required>
+            <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos" class="w-full border border-gray-300 rounded px-3 py-2 mb-3" required>
+
             <datalist id="lista_productos">
                 {% for producto in productos %}
                     <option value="{{ producto.nombre }}">
@@ -78,23 +87,23 @@
     </div>
 </div>
 
-<!-- Modal Importar Excel -->
+<!-- MODAL: Importar desde Excel -->
 <div id="modalImportarSalida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-    <button onclick="cerrarModalImportarSalida()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
-    <h2 class="text-xl font-bold mb-4">Importar Salidas desde Excel</h2>
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <button onclick="cerrarModalImportarSalida()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
+        <h2 class="text-xl font-bold mb-4">Importar Salidas desde Excel</h2>
 
-    <form method="POST" action="{% url 'importar_salidas' %}" enctype="multipart/form-data">
-      {% csrf_token %}
-      <label for="archivo_excel" class="block mb-2 font-medium">Selecciona un archivo .xlsx</label>
-      <input type="file" name="archivo_excel" accept=".xlsx" required class="mb-4">
+        <form method="POST" action="{% url 'importar_salidas' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="archivo_excel" class="block mb-2 font-medium">Selecciona un archivo .xlsx</label>
+            <input type="file" name="archivo_excel" accept=".xlsx" required class="mb-4">
 
-      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Importar</button>
-    </form>
-  </div>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Importar</button>
+        </form>
+    </div>
 </div>
 
-<!-- JS para mostrar info producto -->
+<!-- SCRIPT: Mostrar datos del producto según nombre -->
 <script>
 const productosData = {{ productos_json|safe }};
 
@@ -111,7 +120,7 @@ document.getElementById('producto_nombre').addEventListener('input', function ()
 });
 </script>
 
-<!-- Modal Control -->
+<!-- SCRIPT: Modal de registrar salida -->
 <script>
 function abrirModalSalida() {
     document.getElementById("modalSalida").style.display = "flex";
@@ -121,7 +130,7 @@ function cerrarModalSalida() {
 }
 </script>
 
-<!-- Guardar cantidad -->
+<!-- SCRIPT: Guardar nueva cantidad -->
 <script>
 function guardarCantidadSalida(salidaId, cantidad) {
     fetch("{% url 'actualizar_cantidad_salida' %}", {
@@ -141,7 +150,7 @@ function guardarCantidadSalida(salidaId, cantidad) {
 }
 </script>
 
-<!-- Actualizar producto -->
+<!-- SCRIPT: Actualizar producto de una salida -->
 <script>
 function actualizarProductoSalida(selectElement, salidaId) {
     const nombreSeleccionado = selectElement.value;
@@ -175,7 +184,7 @@ function actualizarProductoSalida(selectElement, salidaId) {
 }
 </script>
 
-<!-- Eliminar salida -->
+<!-- SCRIPT: Eliminar salida -->
 <script>
 function eliminarSalida(salidaId) {
     if (!confirm("¿Estás seguro de que deseas eliminar esta salida?")) return;
@@ -199,7 +208,7 @@ function eliminarSalida(salidaId) {
 }
 </script>
 
-<!-- Get CSRF token -->
+<!-- SCRIPT: Obtener token CSRF de las cookies -->
 <script>
 function getCookie(name) {
     let cookieValue = null;
@@ -217,20 +226,20 @@ function getCookie(name) {
 }
 </script>
 
+<!-- SCRIPT: Alternar edición de salidas -->
 <script>
 function alternarEdicion() {
     const acciones = document.querySelectorAll('.acciones-salida');
     const campos = document.querySelectorAll('select, input[type="number"]');
 
     acciones.forEach(el => el.classList.toggle('hidden'));
-
     campos.forEach(inp => {
         inp.disabled = !inp.disabled;
     });
 }
 </script>
 
-
+<!-- SCRIPT: Modal importar salida -->
 <script>
 function abrirModalImportarSalida() {
     document.getElementById('modalImportarSalida').style.display = 'flex';
@@ -239,9 +248,5 @@ function cerrarModalImportarSalida() {
     document.getElementById('modalImportarSalida').style.display = 'none';
 }
 </script>
-
-
-
-
 
 {% endblock %}

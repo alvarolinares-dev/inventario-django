@@ -3,13 +3,20 @@
 
 {% block content %}
 
+<!-- ✅ Título principal -->
 <h1 class="text-2xl font-bold mb-4">Entradas de Productos al Almacén</h1>
 
+<!-- ✅ Botones de acción (Agregar / Importar) -->
 <div class="flex space-x-4 mb-6">
-    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar Entrada</button>
-    <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar entradas desde Excel</button>
+    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Agregar Entrada
+    </button>
+    <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Importar entradas desde Excel
+    </button>
 </div>
 
+<!-- ✅ Tabla de entradas -->
 <table class="min-w-full bg-white shadow rounded-lg">
     <thead>
         <tr class="bg-gray-200 text-gray-700">
@@ -24,6 +31,7 @@
     <tbody>
         {% for entrada in entradas %}
         <tr class="border-b hover:bg-gray-100">
+            <!-- Selector de productos -->
             <td class="py-2 px-4">
               <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
                 {% for producto in productos %}
@@ -31,23 +39,30 @@
                 {% endfor %}
               </select>
             </td>
+            <!-- Código del producto -->
             <td class="py-2 px-4" id="codigo_{{ entrada.id }}">{{ entrada.producto.codigo }}</td>
+            <!-- Campo editable de cantidad -->
             <td class="py-2 px-4">
               <input type="number" value="{{ entrada.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidad({{ entrada.id }}, this.value)">
             </td>
+            <!-- Proveedor -->
             <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
-            <td class="py-2 px-4">{{ entrada.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
+            <!-- Fecha formateada -->
+            <td class="py-2 px-4">{{ entrada.fecha|date:"d \\d\\e F \\d\\e Y - h:i A" }}</td>
+            <!-- Botón eliminar -->
             <td class="py-2 px-4">
               <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="text-center py-4">No hay entradas registradas.</td></tr>
+        <tr>
+          <td colspan="6" class="text-center py-4">No hay entradas registradas.</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!-- ✅ MODAL POPUP: Registrar Entrada -->
+<!-- ✅ MODAL: Registrar entrada -->
 <div id="modalEntrada" class="modal">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalEntrada()">&times;</span>
@@ -55,6 +70,7 @@
     <form method="post" action="{% url 'registrar_entrada' %}">
       {% csrf_token %}
 
+      <!-- Campo de búsqueda del producto -->
       <label>Producto:</label>
       <input type="text" id="producto_nombre" name="producto_nombre" list="lista_productos" class="form-control w-full mb-2" required>
       <datalist id="lista_productos">
@@ -63,9 +79,11 @@
         {% endfor %}
       </datalist>
 
+      <!-- Información adicional dinámica -->
       <p class="text-sm mb-1"><strong>Código:</strong> <span id="producto_codigo">---</span></p>
       <p class="text-sm mb-4"><strong>Proveedor:</strong> <span id="producto_proveedor">---</span></p>
 
+      <!-- Campo de cantidad -->
       <label>Cantidad:</label>
       <input type="number" name="cantidad" class="form-control w-full mb-4" required>
 
@@ -74,7 +92,7 @@
   </div>
 </div>
 
-<!-- ✅ MODAL POPUP: Importar Entrada -->
+<!-- ✅ MODAL: Importar entradas -->
 <div id="modalImportarEntrada" class="modal">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalImportarEntrada()">&times;</span>
@@ -88,7 +106,7 @@
   </div>
 </div>
 
-<!-- ✅ ESTILOS -->
+<!-- ✅ ESTILOS de los modales -->
 <style>
 .modal {
   position: fixed;
@@ -122,7 +140,7 @@
 }
 </style>
 
-<!-- ✅ SCRIPTS DE FUNCIONALIDAD -->
+<!-- ✅ SCRIPTS FUNCIONALES -->
 <script>
 function abrirModalEntrada() {
   document.getElementById("modalEntrada").style.display = "flex";
@@ -137,6 +155,7 @@ function cerrarModalImportarEntrada() {
   document.getElementById("modalImportarEntrada").style.display = "none";
 }
 
+// Actualizar datos de código/proveedor cuando se selecciona un producto
 const productosData = {{ productos_json|safe }};
 document.getElementById('producto_nombre').addEventListener('input', function () {
   const nombre = this.value;
@@ -150,6 +169,7 @@ document.getElementById('producto_nombre').addEventListener('input', function ()
   }
 });
 
+// Guardar nueva cantidad al cambiar el input
 function guardarCantidad(entradaId, cantidad) {
   fetch("{% url 'actualizar_cantidad' %}", {
     method: "POST",
@@ -167,6 +187,7 @@ function guardarCantidad(entradaId, cantidad) {
   });
 }
 
+// Cambiar producto en una entrada
 function actualizarProducto(selectElement, entradaId) {
   const nombreSeleccionado = selectElement.value;
   const producto = productosData.find(p => p.nombre === nombreSeleccionado);
@@ -195,6 +216,7 @@ function actualizarProducto(selectElement, entradaId) {
   }
 }
 
+// Eliminar entrada
 function eliminarEntrada(entradaId) {
   if (!confirm("¿Deseas eliminar esta entrada?")) return;
 
@@ -216,6 +238,7 @@ function eliminarEntrada(entradaId) {
   });
 }
 
+// Función para obtener CSRF token desde cookies
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -233,3 +256,4 @@ function getCookie(name) {
 </script>
 
 {% endblock %}
+

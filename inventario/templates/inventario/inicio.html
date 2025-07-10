@@ -2,23 +2,31 @@
 {% load static %}
 
 {% block content %}
+<!-- Título principal -->
 <h1 class="text-xl font-bold mb-6">Productos en Inventario</h1>
+
+<!-- Buscador de productos -->
 <input type="text" id="buscador" placeholder="Buscar producto..."
       class="w-full mb-4 p-2 border border bg-gray-300 rounded">
 
+<!-- Botón para abrir modal de creación -->
 <button onclick="abrirModalCrear()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
     Agregar Producto
 </button>
 
+<!-- Botón para abrir modal de importación (no usa href, usa JS) -->
 <button href="{% url 'importar_productos' %}" class="bg-blue-500 text-white px-4 py-2 rounded mb-4" onclick="abrirModalImportar()"> 
   Importar productos desde excel
-
 </button>
 
+<!-- GRID de productos -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
   {% for producto in productos %}
   <div class="col-md-4 mb-4">
-    <div class="card h-100 shadow cursor-pointer" style="position: relative;" onclick="abrirModal({{ producto.id }})" style="cursor: pointer;">
+    <!-- Tarjeta del producto -->
+    <div class="card h-100 shadow cursor-pointer" style="position: relative;" onclick="abrirModal({{ producto.id }})">
+      
+      <!-- Imagen o mensaje por defecto -->
       {% if producto.imagen %}
         <img src="{{ producto.imagen.url }}" class="card-img-top" alt="Imagen del producto">
       {% else %}
@@ -26,6 +34,8 @@
           <span>Sin imagen</span>
         </div>
       {% endif %}
+
+      <!-- Cuerpo de la tarjeta -->
       <div class="card-body">
         <h5 class="card-title">{{ producto.nombre }}</h5>
         <p class="card-text"><strong>Código:</strong> {{ producto.codigo }}</p>
@@ -34,6 +44,7 @@
         <p class="card-text"><strong>Precio:</strong> S/ {{ producto.precio_unitario }}</p>
         <p class="card-text"><strong>Stock:</strong> <span class="badge bg-success">{{ producto.stock_actual }}</span></p>
         
+        <!-- Botón eliminar producto -->
         <form action="{% url 'eliminar_producto' producto.id %}" method="post" 
               onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');"
               style="position: absolute; top: 10px; right: 10px; z-index: 10;">
@@ -48,43 +59,41 @@
   {% endfor %}
 </div>
 
-<!-- Modal para Editar Producto -->
- <div id="modal-producto" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close" onclick="cerrarModal()">&times;</span>
-        <form id="formProducto" method="post" action="{%  url 'editar_producto' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" id="producto_id" name="producto_id">
+<!-- Modal para editar producto existente -->
+<div id="modal-producto" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal()">&times;</span>
+    <form id="formProducto" method="post" action="{% url 'editar_producto' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" id="producto_id" name="producto_id">
 
-            <label>Nombre:</label>
-            <input type="text" id="nombre" name="nombre" class="form-control"><br>
+      <label>Nombre:</label>
+      <input type="text" id="nombre" name="nombre" class="form-control"><br>
 
-            <label>Código:</label>
-            <input type="text" id="codigo" name="codigo" class="form-control"><br>
+      <label>Código:</label>
+      <input type="text" id="codigo" name="codigo" class="form-control"><br>
 
-            <label>Proveedor:</label>
-            <input type="text" id="proveedor" name="proveedor" class="form-control"><br>
+      <label>Proveedor:</label>
+      <input type="text" id="proveedor" name="proveedor" class="form-control"><br>
 
-            <label>Precio Unitario:</label>
-            <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
+      <label>Precio Unitario:</label>
+      <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
 
-            <label>Imagen:</label>
-            <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
+      <label>Imagen:</label>
+      <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
 
-            <button type="submit" class="btn  btn-success">Guardar cambio</button>
-        </form>
-    </div>
- </div>
+      <button type="submit" class="btn btn-success">Guardar cambio</button>
+    </form>
+  </div>
+</div>
 
-
-
- <!-- Modal para crear producto -->
+<!-- Modal para crear nuevo producto -->
 <div id="modal-crear" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalCrear()">&times;</span>
     <form id="formCrearProducto" method="post" enctype="multipart/form-data" action="{% url 'crear_producto' %}">
       {% csrf_token %}
-      
+
       <label>Nombre:</label>
       <input type="text" name="nombre" class="form-control"><br>
 
@@ -108,22 +117,21 @@
   </div>
 </div>
 
-<!-- Modal para Importar -->
- <div id="modal-importar" class="modal" style="display: none;">
+<!-- Modal para importar desde Excel -->
+<div id="modal-importar" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close" onclick="cerrarModalImportar()">&times;</span>
-    <h5 class="text.lg font-semibold mb-4"> Importar Productos desde Excel</h5>
+    <h5 class="text.lg font-semibold mb-4">Importar Productos desde Excel</h5>
     <form method="post" action="{% url 'importar_productos' %}" enctype="multipart/form-data">
       {% csrf_token %}
-      <label for="archivo_excel"> Selecciona el archivo Excel ( .xlsx o .xls):</label>
+      <label for="archivo_excel">Selecciona el archivo Excel (.xlsx o .xls):</label>
       <input type="file" name="archivo_excel" id="archivo_excel" class="form-control my-2" required>
-      <button type="submit" class="btn btn-success"> Importar</button>
+      <button type="submit" class="btn btn-success">Importar</button>
     </form>
   </div>
- </div>
+</div>
 
-
-<!-- Script de Modal para configurar tarjetas -->
+<!-- SCRIPT: Modal de edición de producto -->
 <script>
 function abrirModal(id) {
   id = parseInt(id);
@@ -144,6 +152,7 @@ function cerrarModal() {
 }
 </script>
 
+<!-- SCRIPT: Modal de creación de producto -->
 <script>
 function abrirModalCrear() {
   document.getElementById("modal-crear").style.display = "flex";
@@ -153,7 +162,7 @@ function cerrarModalCrear() {
 }
 </script>
 
-<!-- Script De modal para importar archivos -->
+<!-- SCRIPT: Modal de importación -->
 <script>
 function abrirModalImportar() {
   document.getElementById("modal-importar").style.display = "flex";
@@ -163,21 +172,20 @@ function cerrarModalImportar() {
 }
 </script>
 
-<!-- Script para el buscador -->
- <script>
-  document.getElementById('buscador').addEventListener('keyup', function () {
-    const filtro = this.value.toLowerCase();
-    const tarjetas = document.querySelectorAll('.card');
+<!-- SCRIPT: Buscador -->
+<script>
+document.getElementById('buscador').addEventListener('keyup', function () {
+  const filtro = this.value.toLowerCase();
+  const tarjetas = document.querySelectorAll('.card');
 
-    tarjetas.forEach(card => {
-      const texto = card.innerText.toLowerCase();
-      card.parentElement.style.display = texto.includes(filtro) ? '' : 'none';
-    });
+  tarjetas.forEach(card => {
+    const texto = card.innerText.toLowerCase();
+    card.parentElement.style.display = texto.includes(filtro) ? '' : 'none';
   });
- </script>
+});
+</script>
 
-
-<!-- Estilos -->
+<!-- ESTILOS de los modales -->
 <style>
 .modal {
     position: fixed;
@@ -206,4 +214,3 @@ function cerrarModalImportar() {
 </style>
 
 {% endblock %}
-

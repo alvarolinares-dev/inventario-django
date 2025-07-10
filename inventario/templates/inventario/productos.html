@@ -2,14 +2,20 @@
 {% load static %}
 
 {% block content %}
+<!-- Título principal -->
 <h1 class="mb-4">Productos en Inventario</h1>
 
+<!-- Botón para importar productos desde archivo Excel -->
 <a href="{% url 'importar_productos' %}" class="btn btn-primary">📥 Importar productos desde Excel</a>
 
+<!-- Grid de productos -->
 <div class="row">
   {% for producto in productos %}
   <div class="col-md-4 mb-4">
+    <!-- Tarjeta de producto: se abre modal al hacer clic -->
     <div class="card h-100 shadow cursor-pointer" onclick="abrirModal({{ producto.id }})" style="cursor: pointer;">
+
+      <!-- Imagen del producto si existe, si no muestra “Sin imagen” -->
       {% if producto.imagen %}
         <img src="{{ producto.imagen.url }}" class="card-img-top" alt="Imagen del producto">
       {% else %}
@@ -17,6 +23,8 @@
           <span>Sin imagen</span>
         </div>
       {% endif %}
+
+      <!-- Detalles del producto -->
       <div class="card-body">
         <h5 class="card-title">{{ producto.nombre }}</h5>
         <p class="card-text"><strong>Código:</strong> {{ producto.codigo }}</p>
@@ -29,41 +37,44 @@
   {% endfor %}
 </div>
 
-<!-- Modal -->
- <div id="modal-producto" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close" onclick="cerrarModal()">&times;</span>
-        <form id="formProducto" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" id="producto_id" name="producto_id">
+<!-- MODAL para editar producto -->
+<div id="modal-producto" class="modal" style="display:none;">
+  <div class="modal-content">
+    <!-- Botón cerrar modal -->
+    <span class="close" onclick="cerrarModal()">&times;</span>
 
-            <label>Nombre:</label>
-            <input type="text" id="nombre" name="nombre" class="form-control"><br>
+    <!-- Formulario de edición de producto -->
+    <form id="formProducto" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" id="producto_id" name="producto_id">
 
-            <label>Código:</label>
-            <input type="text" id="codigo" name="codigo" class="form-control"><br>
+      <label>Nombre:</label>
+      <input type="text" id="nombre" name="nombre" class="form-control"><br>
 
-            <label>Proveedor:</label>
-            <input type="text" id="proveedor" name="proveedor" class="form-control"><br>
+      <label>Código:</label>
+      <input type="text" id="codigo" name="codigo" class="form-control"><br>
 
-            <label>Precio Unitario:</label>
-            <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
+      <label>Proveedor:</label>
+      <input type="text" id="proveedor" name="proveedor" class="form-control"><br>
 
-            <label>Imagen:</label>
-            <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
+      <label>Precio Unitario:</label>
+      <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
 
-            <button type="submit" class="btn  btn-success">Guardar cambio</button>
-        </form>
-    </div>
- </div>
+      <label>Imagen:</label>
+      <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
 
- <!-- Estilos de modal -->
+      <button type="submit" class="btn btn-success">Guardar cambio</button>
+    </form>
+  </div>
+</div>
+
+<!-- ESTILOS personalizados para el modal -->
 <style>
 .modal {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.6); /* fondo negro con opacidad */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,10 +96,10 @@
 }
 </style>
 
-<!--JavaScript para cargar modal-->
+<!-- SCRIPT: Cargar datos de producto y mostrar modal -->
 <script>
 function abrirModal(id) {
-  id = parseInt(id);
+  id = parseInt(id);  // asegura que sea entero
   fetch(`/productos/${id}/json/`)
     .then(res => res.json())
     .then(data => {
@@ -101,6 +112,8 @@ function abrirModal(id) {
     })
     .catch(err => console.error("Error al cargar el producto:", err));
 }
+
+// Cierra el modal
 function cerrarModal() {
   document.getElementById("modal-producto").style.display = "none";
 }
