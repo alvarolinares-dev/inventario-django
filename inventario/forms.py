@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Entrada, Salida
+from .models import Producto, Entrada, Salida
 
 # Formulario para registrar una nueva entrada de producto
 class EntradaForm(forms.ModelForm):
@@ -30,3 +30,17 @@ class SalidaForm(forms.ModelForm):
                 raise forms.ValidationError(
                     f"No hay suficiente stock disponible. Stock actual: {stock_actual}"
                 )
+
+# Formulario para productos
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        fields = [
+            'nombre',
+            'proveedor',
+            'tipo_adquisicion',
+            'precio_unitario',
+            'peso_unitario',
+            'unidad_medida',
+            'imagen',
+        ]

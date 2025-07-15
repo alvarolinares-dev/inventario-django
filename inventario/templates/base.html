@@ -33,17 +33,36 @@
 
   <body class="h-screen flex">
     
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-gray-800 text-white p-4">
-      <h2 class="text-xl font-bold mb-6">C&R Inventario</h2>
+<body class="h-screen flex">
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-gray-800 text-white p-4">
+    <a href="{% url 'inicio' %}"class="text-xl font-bold mb-6">C&R Inventario</a>
 
-      <!-- Navegación lateral -->
-      <nav class="flex flex-col space-y-2">
-        <a href="{% url 'inicio' %}" class="hover:bg-gray-700 p-2 rounded">Productos</a>
-        <a href="{% url 'registrar_entrada' %}" class="hover:bg-gray-700 p-2 rounded">Entradas</a>
-        <a href="{% url 'registrar_salida' %}" class="hover:bg-gray-700 p-2 rounded">Salidas</a>
-      </nav>
-    </aside>
+    <!-- Navegación lateral -->
+    <nav class="flex flex-col space-y-2">
+      <!-- Link directo a productos -->
+      <a href="{% url 'inicio' %}" class="hover:bg-gray-700 p-2 rounded">Productos</a>
+
+      <!-- Menú desplegable con clic -->
+      <div>
+        <button type="button" onclick="toggleDropdown()" class="w-full text-left hover:bg-gray-700 p-2 rounded flex justify-between items-center">
+          📦 Transacciones de Inventario
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Submenú -->
+        <div id="dropdownStock" class="hidden ml-4 mt-2 space-y-1">
+          <a href="{% url 'pedidos' %}" class="block hover:bg-gray-700 p-2 rounded">Pedidos</a>
+          <a href="{% url 'registrar_entrada' %}" class="block hover:bg-gray-700 p-2 rounded">Entradas</a>
+          <a href="{% url 'salidas_view' %}" class="block hover:bg-gray-700 p-2 rounded">Salidas</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-1 p-6 bg-gray-100 overflow-y-auto">
@@ -70,3 +89,12 @@
 
   </body>
 </html>
+
+
+<!-- Script para manejar el click -->
+ <script>
+  function toggleDropdown(){
+    const dropdown = document.getElementById('dropdownStock');
+    dropdown.classList.toggle('hidden');
+  }
+ </script>

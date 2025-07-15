@@ -23,6 +23,8 @@
             <th class="py-2 px-4 text-left">Producto</th>
             <th class="py-2 px-4 text-left">Código</th>
             <th class="py-2 px-4 text-left">Cantidad</th>
+            <th class="py-2 px-4 text-left">U.M</th>
+            <th class="py-2 px-4 text-left">Peso Unitario</th>
             <th class="py-2 px-4 text-left">Proveedor</th>
             <th class="py-2 px-4 text-left">Fecha</th>
             <th class="py-2 px-4 text-left">Acciones</th>
@@ -45,6 +47,10 @@
             <td class="py-2 px-4">
               <input type="number" value="{{ entrada.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidad({{ entrada.id }}, this.value)">
             </td>
+            <!-- Unidad de Medida -->
+            <td class="py-2 px-4">{{ entrada.producto.unidad_medida }}</td>
+            <!-- Peso Unitario -->
+            <td class="py-2 px-4">{{ entrada.producto.peso_unitario }}</td>
             <!-- Proveedor -->
             <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
             <!-- Fecha formateada -->

@@ -8,7 +8,7 @@
 <!-- Botones de acción -->
 <div class="flex space-x-4 mb-6">
     <button onclick="abrirModalSalida()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Agregar Salida</button>
-    <button onclick="abrirModalImportarSalida()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Importar Excel</button>
+    <button onclick="abrirModalImportarSalida()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Importar Salidas</button>
     <button onclick="alternarEdicion()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
 </div>
 
@@ -19,6 +19,9 @@
             <th class="py-2 px-4 text-left">Producto</th>
             <th class="py-2 px-4 text-left">Código</th>
             <th class="py-2 px-4 text-left">Cantidad</th>
+            <th class="py-2 px-4 text-left">U.M</th>
+            <th class="py-2 px-4 text-left">Peso Unitario</th>
+            <th class="py-2 px-4 text-left">Precio Unitario</th>
             <th class="py-2 px-4 text-left">Proveedor</th>
             <th class="py-2 px-4 text-left">Fecha</th>
             <th class="py-2 px-4 text-left">Acciones</th>
@@ -41,6 +44,12 @@
             <td class="py-2 px-4">
                 <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)" disabled>
             </td>
+            <!-- Unidad de Medida  -->
+            <td class="py-2 px-4">{{ salida.producto.unidad_medida }}</td>
+            <!-- Peso Unitario -->
+            <td class="py-2 px-4">{{ salida.producto.peso_unitario }}</td>
+            <!-- Precio Unitario -->
+            <td class="py-2 px-4">{{ salida.producto.precio_unitario }}</td>
             <!-- Proveedor del producto -->
             <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
             <!-- Fecha de la salida -->
@@ -102,6 +111,7 @@
         </form>
     </div>
 </div>
+
 
 <!-- SCRIPT: Mostrar datos del producto según nombre -->
 <script>
@@ -183,6 +193,7 @@ function actualizarProductoSalida(selectElement, salidaId) {
     }
 }
 </script>
+
 
 <!-- SCRIPT: Eliminar salida -->
 <script>

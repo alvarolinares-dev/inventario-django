@@ -1,3 +1,4 @@
+import openpyxl.workbook
 import pandas as pd
 import openpyxl
 import json
@@ -26,10 +27,13 @@ def lista_productos(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
         producto = get_object_or_404(Producto, id=producto_id)
+
         producto.nombre = request.POST.get('nombre')
         producto.codigo = request.POST.get('codigo')
         producto.proveedor = request.POST.get('proveedor')
         producto.precio_unitario = request.POST.get('precio')
+        producto.peso_unitario = request.POST.get('peso_unitario')  # <- AÑADIR
+        producto.unidad_medida = request.POST.get('unidad_medida')  # <- AÑADIR
 
         if 'imagen' in request.FILES:
             producto.imagen = request.FILES['imagen']
@@ -131,8 +135,12 @@ def producto_json(request, id):
         'codigo': producto.codigo,
         'proveedor': producto.proveedor,
         'precio_unitario': str(producto.precio_unitario) if producto.precio_unitario else 0,
+        'peso_unitario': str(producto.peso_unitario) if producto.peso_unitario else '',
+        'unidad_medida': producto.unidad_medida,
     }
     return JsonResponse(data)
+
+
 
 # Edita los datos de un producto
 def editar_productos(request):
@@ -144,6 +152,9 @@ def editar_productos(request):
         producto.codigo = request.POST.get('codigo')
         producto.proveedor = request.POST.get('proveedor')
         producto.precio_unitario = request.POST.get('precio_unitario')
+        producto.peso_unitario = request.POST.get('peso_unitario')
+        producto.unidad_medida = request.POST.get('unidad_medida')
+
 
         if 'imagen' in request.FILES:
             producto.imagen = request.FILES['imagen']
@@ -160,6 +171,9 @@ def crear_producto(request):
         tipo_adquisicion = request.POST.get('tipo_adquisicion')
         precio_unitario = request.POST.get('precio_unitario')
         imagen = request.FILES.get('imagen')
+        peso_unitario = request.POST.get('peso_unitario')
+        unidad_medida = request.POST.get('unidad_medida')
+
 
         nuevo_producto = Producto(
             nombre=nombre,
@@ -167,8 +181,11 @@ def crear_producto(request):
             proveedor=proveedor,
             tipo_adquisicion=tipo_adquisicion,
             precio_unitario=precio_unitario,
+            peso_unitario=peso_unitario,
+            unidad_medida=unidad_medida,
             imagen=imagen
-        )
+            )
+
         nuevo_producto.save()
         return redirect('inicio')
     return redirect('inicio')
@@ -350,3 +367,6 @@ def eliminar_salida(request):
         except Salida.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Salida no encontrada'})
     return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+def pedidos_view(request):
+    return render(request, 'inventario/pedidos.html')

@@ -43,6 +43,8 @@
         <p class="card-text"><strong>Adquisición:</strong> {{ producto.get_tipo_adquisicion_display }}</p>
         <p class="card-text"><strong>Precio:</strong> S/ {{ producto.precio_unitario }}</p>
         <p class="card-text"><strong>Stock:</strong> <span class="badge bg-success">{{ producto.stock_actual }}</span></p>
+        <p class="card-text"><strong>Peso:</strong> {{ producto.peso_unitario }}</p>
+        <p class="card-text"><strong>U.M:</strong> {{ producto.get_unidad_medida_display }}</p>
         
         <!-- Botón eliminar producto -->
         <form action="{% url 'eliminar_producto' producto.id %}" method="post" 
@@ -78,6 +80,22 @@
 
       <label>Precio Unitario:</label>
       <input type="number" step="0.01" id="precio" name="precio_unitario" class="form-control"><br>
+      <label>Peso Unitario:</label>
+        <input type="number" step="0.01" id= "peso_unitario" name="peso_unitario" class="form-control"><br>
+      <label>U.M:</label>
+        <select id="unidad_medida" name="unidad_medida" class="form-control" required>
+          <option value="UND">Unidades</option>
+          <option value="MTR">Metros</option>
+          <option value="CM">Centímetros</option>
+          <option value="KG">Kilogramos</option>
+          <option value="GR">Gramos</option>
+          <option value="LT">Litros</option>
+          <option value="ML">Mililitros</option>
+          <option value="CJ">Cajones</option>
+          <option value="PAQ">Paquete</option>
+          <option value="ROL">Rollo</option>
+          <option value="BLT">Balde/Tarro</option>
+        </select><br>
 
       <label>Imagen:</label>
       <input type="file" id="imagen" name="imagen" class="form-control"><br><br>
@@ -109,6 +127,24 @@
       <label>Precio Unitario:</label>
       <input type="number" step="0.01" name="precio_unitario" class="form-control"><br>
 
+      <label>Peso Unitario:</label>
+      <input type="number" step="0.01" name="peso_unitario" class="form-control"><br>
+
+      <label>U.M:</label>
+      <select name="unidad_medida" class="form-control" required>
+        <option value="UND">Unidades</option>
+        <option value="MTR">Metros</option>
+        <option value="CM">Centímetros</option>
+        <option value="KG">Kilogramos</option>
+        <option value="GR">Gramos</option>
+        <option value="LT">Litros</option>
+        <option value="ML">Mililitros</option>
+        <option value="CJ">Cajones</option>
+        <option value="PAQ">Paquete</option>
+        <option value="ROL">Rollo</option>
+        <option value="BLT">Balde/Tarro</option>
+      </select><br>
+
       <label>Imagen:</label>
       <input type="file" name="imagen" class="form-control"><br><br>
 
@@ -116,6 +152,7 @@
     </form>
   </div>
 </div>
+
 
 <!-- Modal para importar desde Excel -->
 <div id="modal-importar" class="modal" style="display: none;">
@@ -143,10 +180,14 @@ function abrirModal(id) {
       document.getElementById("codigo").value = data.codigo;
       document.getElementById("proveedor").value = data.proveedor;
       document.getElementById("precio").value = data.precio_unitario;
+      document.getElementById("peso_unitario").value = data.peso_unitario;
+      document.getElementById("unidad_medida").value = data.unidad_medida;
       document.getElementById("modal-producto").style.display = "flex";
     })
     .catch(err => console.error("Error al cargar el producto:", err));
 }
+
+
 function cerrarModal() {
   document.getElementById("modal-producto").style.display = "none";
 }
