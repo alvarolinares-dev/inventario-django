@@ -13,57 +13,60 @@
 </div>
 
 <!-- Tabla de salidas registradas -->
-<table class="min-w-full bg-white shadow rounded-lg">
+<div class="overflow-x-auto">
+<table class="w-full table-auto bg-white shadow rounded-lg text-sm whitespace-nowrap">
     <thead>
         <tr class="bg-gray-200 text-gray-700">
-            <th class="py-2 px-4 text-left">Producto</th>
-            <th class="py-2 px-4 text-left">Código</th>
-            <th class="py-2 px-4 text-left">Cantidad</th>
-            <th class="py-2 px-4 text-left">U.M</th>
-            <th class="py-2 px-4 text-left">Peso Unitario</th>
-            <th class="py-2 px-4 text-left">Precio Unitario</th>
-            <th class="py-2 px-4 text-left">Proveedor</th>
-            <th class="py-2 px-4 text-left">Fecha</th>
-            <th class="py-2 px-4 text-left">Acciones</th>
+            <th class="py-2 px-3 min-w-[200px]">Producto</th>
+            <th class="py-2 px-3 min-w-[100px]">Código</th>
+            <th class="py-2 px-3 min-w-[80px] text-center">Cantidad</th>
+            <th class="py-2 px-3 min-w-[80px] text-center">U.M</th>
+            <th class="py-2 px-3 min-w-[100px] text-center">Peso Unitario</th>
+            <th class="py-2 px-3 min-w-[100px] text-center">Precio Unitario</th>
+            <th class="py-2 px-3 min-w-[120px]">Proveedor</th>
+            <th class="py-2 px-3 min-w-[160px]">Fecha</th>
+            <th class="py-2 px-3 min-w-[100px] text-center">Acciones</th>
         </tr>
     </thead>
     <tbody>
         {% for salida in salidas %}
         <tr class="border-b hover:bg-gray-100">
-            <!-- Producto editable -->
-            <td class="py-2 px-4">
-                <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm" disabled>
+            <!-- Producto -->
+            <td class="py-1 px-3">
+                <select onchange="actualizarProductoSalida(this, {{ salida.id }})" class="border rounded px-1 py-1 text-sm w-full" disabled>
                     {% for producto in productos %}
                         <option value="{{ producto.nombre }}" {% if salida.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
                     {% endfor %}
                 </select>
             </td>
-            <!-- Código del producto -->
-            <td class="py-2 px-4" id="codigo_{{ salida.id }}">{{ salida.producto.codigo }}</td>
-            <!-- Cantidad editable -->
-            <td class="py-2 px-4">
-                <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidadSalida({{ salida.id }}, this.value)" disabled>
+            <!-- Código -->
+            <td class="py-1 px-3" id="codigo_{{ salida.id }}">{{ salida.producto.codigo }}</td>
+            <!-- Cantidad -->
+            <td class="py-1 px-3 text-center">
+                <input type="number" value="{{ salida.cantidad }}" class="border rounded px-2 py-1 w-20 text-sm text-center" onchange="guardarCantidadSalida({{ salida.id }}, this.value)" disabled>
             </td>
-            <!-- Unidad de Medida  -->
-            <td class="py-2 px-4">{{ salida.producto.unidad_medida }}</td>
+            <!-- U.M -->
+            <td class="py-1 px-3 text-center">{{ salida.producto.unidad_medida }}</td>
             <!-- Peso Unitario -->
-            <td class="py-2 px-4">{{ salida.producto.peso_unitario }}</td>
+            <td class="py-1 px-3 text-center">{{ salida.producto.peso_unitario }}</td>
             <!-- Precio Unitario -->
-            <td class="py-2 px-4">{{ salida.producto.precio_unitario }}</td>
-            <!-- Proveedor del producto -->
-            <td class="py-2 px-4" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
-            <!-- Fecha de la salida -->
-            <td class="py-2 px-4">{{ salida.fecha|date:"d \d\e F \d\e Y - h:i A" }}</td>
-            <!-- Botón eliminar -->
-            <td class="py-2 px-4 acciones-salida hidden">
-                <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
+            <td class="py-1 px-3 text-center">{{ salida.producto.precio_unitario }}</td>
+            <!-- Proveedor -->
+            <td class="py-1 px-3" id="proveedor_{{ salida.id }}">{{ salida.producto.proveedor }}</td>
+            <!-- Fecha -->
+            <td class="py-1 px-3">{{ salida.fecha|date:"d \\d\\e F \\d\\e Y - h:i A" }}</td>
+            <!-- Acciones -->
+            <td class="py-1 px-3 text-center acciones-salida hidden">
+                <button onclick="eliminarSalida({{ salida.id }})" class="bg-red-600 text-white px-2 py-1 rounded text-sm">Eliminar</button>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="text-center py-4">No hay salidas registradas.</td></tr>
+        <tr><td colspan="9" class="text-center py-4">No hay salidas registradas.</td></tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+
 
 <!-- MODAL: Registrar salida manual -->
 <div id="modalSalida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">

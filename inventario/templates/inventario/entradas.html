@@ -8,65 +8,67 @@
 
 <!-- ✅ Botones de acción (Agregar / Importar) -->
 <div class="flex space-x-4 mb-6">
-    <button onclick="abrirModalEntrada()" class="bg-green-600git text-white px-4 py-2 rounded hover:bg-green-700">
+    <button onclick="abrirModalEntrada()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
         Agregar Entrada
     </button>
     <button onclick="abrirModalImportarEntrada()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Importar entradas desde Excel
     </button>
 </div>
-
 <!-- ✅ Tabla de entradas -->
-<table class="min-w-full bg-white shadow rounded-lg">
-    <thead>
-        <tr class="bg-gray-200 text-gray-700">
-            <th class="py-2 px-4 text-left">Producto</th>
-            <th class="py-2 px-4 text-left">Código</th>
-            <th class="py-2 px-4 text-left">Cantidad</th>
-            <th class="py-2 px-4 text-left">U.M</th>
-            <th class="py-2 px-4 text-left">Peso Unitario</th>
-            <th class="py-2 px-4 text-left">Proveedor</th>
-            <th class="py-2 px-4 text-left">Fecha</th>
-            <th class="py-2 px-4 text-left">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entrada in entradas %}
-        <tr class="border-b hover:bg-gray-100">
-            <!-- Selector de productos -->
-            <td class="py-2 px-4">
-              <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm">
-                {% for producto in productos %}
-                  <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
-                {% endfor %}
-              </select>
-            </td>
-            <!-- Código del producto -->
-            <td class="py-2 px-4" id="codigo_{{ entrada.id }}">{{ entrada.producto.codigo }}</td>
-            <!-- Campo editable de cantidad -->
-            <td class="py-2 px-4">
-              <input type="number" value="{{ entrada.cantidad }}" class="border rounded px-2 py-1 w-20" onchange="guardarCantidad({{ entrada.id }}, this.value)">
-            </td>
-            <!-- Unidad de Medida -->
-            <td class="py-2 px-4">{{ entrada.producto.unidad_medida }}</td>
-            <!-- Peso Unitario -->
-            <td class="py-2 px-4">{{ entrada.producto.peso_unitario }}</td>
-            <!-- Proveedor -->
-            <td class="py-2 px-4" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
-            <!-- Fecha formateada -->
-            <td class="py-2 px-4">{{ entrada.fecha|date:"d \\d\\e F \\d\\e Y - h:i A" }}</td>
-            <!-- Botón eliminar -->
-            <td class="py-2 px-4">
-              <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="6" class="text-center py-4">No hay entradas registradas.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="overflow-x-auto">
+  <table class="min-w-full text-sm text-left bg-white rounded shadow">
+      <thead>
+          <tr class="bg-gray-200 text-gray-700">
+              <th class="py-2 px-3 min-w-[200px]">Producto</th>
+              <th class="py-2 px-3 w-32 truncate">Código</th>
+              <th class="py-2 px-3 w-24 text-center">Cantidad</th>
+              <th class="py-2 px-3 w-20 text-center">U.M</th>
+              <th class="py-2 px-3 w-32 text-center">Peso Unitario</th>
+              <th class="py-2 px-3 w-40 truncate">Proveedor</th>
+              <th class="py-2 px-3 w-40">Fecha</th>
+              <th class="py-2 px-3 w-24 text-center">Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for entrada in entradas %}
+          <tr class="border-b hover:bg-gray-50">
+              <!-- Selector de productos -->
+              <td class="py-1 px-3">
+                  <select onchange="actualizarProducto(this, {{ entrada.id }})" class="border rounded px-1 py-1 text-sm w-full">
+                      {% for producto in productos %}
+                          <option value="{{ producto.nombre }}" {% if entrada.producto.nombre == producto.nombre %}selected{% endif %}>{{ producto.nombre }}</option>
+                      {% endfor %}
+                  </select>
+              </td>
+              <!-- Código del producto -->
+              <td class="py-1 px-3 truncate" id="codigo_{{ entrada.id }}">{{ entrada.producto.codigo }}</td>
+              <!-- Campo editable de cantidad -->
+              <td class="py-1 px-3 text-center">
+                  <input type="number" value="{{ entrada.cantidad }}" class="border rounded px-2 py-1 w-20 text-sm text-center" onchange="guardarCantidad({{ entrada.id }}, this.value)">
+              </td>
+              <!-- Unidad de Medida -->
+              <td class="py-1 px-3 text-center">{{ entrada.producto.unidad_medida }}</td>
+              <!-- Peso Unitario -->
+              <td class="py-1 px-3 text-center">{{ entrada.producto.peso_unitario }}</td>
+              <!-- Proveedor -->
+              <td class="py-1 px-3 truncate" id="proveedor_{{ entrada.id }}">{{ entrada.producto.proveedor }}</td>
+              <!-- Fecha formateada -->
+              <td class="py-1 px-3">{{ entrada.fecha|date:"d \\d\\e F \\d\\e Y - h:i A" }}</td>
+              <!-- Botón eliminar -->
+              <td class="py-1 px-3 text-center">
+                  <button onclick="eliminarEntrada({{ entrada.id }})" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs">Eliminar</button>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="8" class="text-center py-4 text-gray-500">No hay entradas registradas.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
 
 <!-- ✅ MODAL: Registrar entrada -->
 <div id="modalEntrada" class="modal">
