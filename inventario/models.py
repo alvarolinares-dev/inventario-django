@@ -28,7 +28,6 @@ class Producto(models.Model):
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     proveedor = models.CharField(max_length=200, blank=True, null=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    peso_unitario = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Datos de medición
     peso_unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0)
